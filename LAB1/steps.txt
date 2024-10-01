@@ -1,0 +1,277 @@
+pip install virtualenv
+
+virtualenv venv
+
+source venv/bin/activate
+
+pip install django djangorestframework
+
+django-admin startproject ubereats_clone
+cd ubereats_clone
+
+python manage.py startapp accounts
+
+In your ubereats_clone/settings.py, add the following apps to INSTALLED_APPS:
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'rest_framework',
+    'accounts',
+]
+
+python manage.py migrate
+
+
+#Configure URLs
+#In ubereats_clone/urls.py, include the accounts URLs.
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('accounts.urls')),
+]
+
+# In the accounts app, create a urls.py file to define your routes for signup, login, and logout:
+from django.urls import path
+from .views import signup, login_user, logout_user
+
+urlpatterns = [
+    path('auth/signup/', signup),
+    path('auth/login/', login_user),
+    path('auth/logout/', logout_user),
+]
+
+# In accounts/views.py, create views for handling user signup, login, and logout:
+
+#signup 
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.contrib.auth.models import User
+
+@api_view(['POST'])
+def signup(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    email = request.data.get('email')
+
+    if not username or not password or not email:
+        return Response({"error": "All fields are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.create_user(username=username, password=password, email=email)
+        user.save()
+        return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+    except:
+        return Response({"error": "User creation failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+#login
+
+from django.contrib.auth import authenticate, login
+
+@api_view(['POST'])
+def login_user(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        login(request, user)
+        return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+#logout
+
+from django.contrib.auth import logout
+
+@api_view(['POST'])
+def logout_user(request):
+    logout(request)
+    return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+
+
+python manage.py runserver
+
+python manage.py createsuperuser (users will get saved in the admin database)
+
+#using curl in terminal just checking my login logout systme
+
+signup - 
+curl -X POST http://127.0.0.1:8000/api/auth/signup/ \
+-H "Content-Type: application/json" \
+-d '{"username": "testuser", "email": "test@example.com", "password": "testpass"}'
+
+Login -
+curl -X POST http://127.0.0.1:8000/api/auth/login/ \
+-H "Content-Type: application/json" \
+-d '{"username": "testuser", "password": "testpass"}'
+
+Logout -
+curl -X POST http://127.0.0.1:8000/api/auth/logout/ \
+-H "Content-Type: application/json"
+
+
+Complete flow with HTML pages -- login page 
+
+Create a signup.html Template in accounts/templates/accounts/signup.html:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+</head>
+<body>
+    <h2>Sign Up</h2>
+    <form method="POST" action="{% url 'signup' %}">
+        {% csrf_token %}
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Sign Up</button>
+    </form>
+
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+</body>
+</html>
+
+
+Create a Signup View in accounts/views.py:
+This view will handle the registration process and redirect to the login page upon successful signup.
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import UserCreationForm
+
+# Signup view
+def signup(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # Check if the user already exists
+        if User.objects.filter(username=username).exists():
+            return render(request, 'accounts/signup.html', {'error': 'Username already exists'})
+
+        # Create the new user
+        user = User.objects.create_user(username=username, email=email, password=password)
+        user.save()
+
+        # Redirect to login page after successful signup
+        return redirect('login')
+
+    return render(request, 'accounts/signup.html')
+
+
+##Create a login.html Template in accounts/templates/accounts/login.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Login</button>
+    </form>
+
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+</body>
+</html>
+
+
+##Create a Login View in accounts/views.py:
+
+from django.contrib.auth import authenticate, login
+
+# Login view
+def login_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')  # Redirect to the dashboard after login
+        else:
+            return render(request, 'accounts/login.html', {'error': 'Invalid credentials'})
+
+    return render(request, 'accounts/login.html')
+
+
+##Create dashboard.html Template in accounts/templates/accounts/dashboard.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UberEats Dashboard</title>
+</head>
+<body>
+    <h2>Welcome to the UberEats Dashboard</h2>
+    <p>This is a placeholder for the UberEats dashboard.</p>
+    <img src="https://via.placeholder.com/300x200" alt="Dashboard Placeholder">
+    <br><br>
+    <a href="{% url 'logout' %}">Logout</a>
+</body>
+</html>
+
+
+##Create the Dashboard View in accounts/views.py:
+
+# Dashboard view
+def dashboard(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    return render(request, 'accounts/dashboard.html')
+
+
+##In accounts/urls.py, define the URLs for signup, login, and dashboard:
+
+from django.urls import path
+from .views import signup, login_user, dashboard, logout_user
+
+urlpatterns = [
+    path('signup/', signup, name='signup'),
+    path('login/', login_user, name='login'),
+    path('dashboard/', dashboard, name='dashboard'),
+    path('logout/', logout_user, name='logout'),
+]
+
+python manage.py runserver
