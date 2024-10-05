@@ -1,21 +1,20 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
-// Function to get CSRF token from cookies
-const getCSRFToken = () => {
-  let csrfToken = null;
-  const cookies = document.cookie.split(";");
-
-  cookies.forEach((cookie) => {
-    const [name, value] = cookie.trim().split("=");
-    if (name === "csrftoken") {
-      csrfToken = value;
-    }
-  });
-
-  return csrfToken;
-};
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  AppBar,
+  Toolbar,
+  Grid,
+  Link,
+  CssBaseline,
+  Paper,
+} from "@mui/material";
+import logo from '../uber_Eats_logo_2.png';
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -23,8 +22,8 @@ function Login() {
     password: ""
   });
 
-  // Create a navigate function for redirection
-  const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");  // To handle the error message
+  const navigate = useNavigate(); // To handle redirection
 
   const handleChange = (e) => {
     setFormData({
@@ -36,48 +35,112 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const csrfToken = getCSRFToken(); // Get CSRF token
-      await axios.post("http://localhost:8000/accounts/login/", formData, {
-        headers: {
-          "X-CSRFToken": csrfToken, // Include CSRF token in the headers
-          "Content-Type": "application/json" // Ensure the content type is JSON
-        },
-        withCredentials: true, // Include credentials with the request
-      });
-
-      // alert("Login successful! Redirecting to dashboard.");
-      navigate("/dashboard"); // Redirect to dashboard after successful login
+      await axios.post("http://localhost:8000/accounts/login/", formData);
+      navigate("/dashboard");  // Redirect to dashboard after successful login
     } catch (err) {
       console.error(err);
-      alert("Invalid credentials. Please try again.");
+      setErrorMessage("Invalid credentials. Please try again.");
     }
   };
 
   return (
-    <div className="login-form">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username</label>
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-    </div>
+    <>
+      <CssBaseline />
+      {/* Flex Container for the whole page */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
+        {/* Header */}
+        <AppBar position="static" sx={{ backgroundColor: '#06C167' }}>
+          <Toolbar>
+            <Box
+              component="img"
+              src={logo}
+              alt="Logo"
+              sx={{ height: 40, width: 'auto', mr: 2 }} // Set height, width auto
+            />
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Uber Eats Clone
+            </Typography>
+            <Button color="inherit" href="/signup">Sign Up</Button>
+          </Toolbar>
+        </AppBar>
+
+        {/* Main Content */}
+        <Container component="main" maxWidth="xs" sx={{ mt: 8, mb: 2, flexGrow: 1 }}>
+          <Paper elevation={3} sx={{ padding: 3 }}>
+            <Typography component="h1" variant="h5" align="center">
+              Login
+            </Typography>
+            {errorMessage && <Typography color="error" align="center">{errorMessage}</Typography>}
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    name="username"
+                    label="Username"
+                    fullWidth
+                    required
+                    value={formData.username}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    name="password"
+                    label="Password"
+                    type="password"
+                    fullWidth
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                </Grid>
+              </Grid>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2, backgroundColor: '#06C167' }}
+              >
+                Login
+              </Button>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link href="/signup" variant="body2">
+                    Don't have an account? Sign Up
+                  </Link>
+                </Grid>
+              </Grid>
+            </Box>
+          </Paper>
+        </Container>
+
+        {/* Footer */}
+        <Box
+          component="footer"
+          sx={{
+            py: 3,
+            px: 2,
+            mt: 'auto',
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light'
+                ? theme.palette.grey[200]
+                : theme.palette.grey[800],
+          }}
+        >
+          <Container maxWidth="sm">
+            <Typography variant="body1" sx={{ textAlign: 'center' }}>
+              © 2024 Uber Eats Clone (Aishwarya Thorat SJSU)
+            </Typography>
+          </Container>
+        </Box>
+      </Box>
+    </>
   );
 }
 
