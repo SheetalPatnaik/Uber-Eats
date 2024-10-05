@@ -1,3 +1,14 @@
+This is -
+
+Client ID
+O0171YSVoUUDuGoSJuwuSw
+
+API Key
+o1b6sAfSMLNCsQ8XlSb71wW_CyhZLFwH-16Wuz10OoMLGXQfuEnz4YmOHOOI9DPSSmb8FrV5vtEh5jXoSIf35vP3mNL1WwpaXKyHxDHC6NQDmoqwyGKjrJeJDkj_ZnYx
+
+
+
+
 pip install virtualenv
 
 virtualenv venv
@@ -275,3 +286,682 @@ urlpatterns = [
 ]
 
 python manage.py runserver
+
+
+
+For profile page  ---
+
+accounts/templates/accounts/dashboard.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Dashboard</h1>
+
+    <ul>
+        <li><a href="{% url 'profile_page' %}">Profile Page</a></li>
+        <li><a href="#">Restaurant Tab</a></li>  <!-- This tab will be implemented later -->
+    </ul>
+
+    <div>
+        <!-- Content for each tab will be loaded here -->
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>
+
+
+accounts/views.py:
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from .models import Profile
+from .forms import ProfileForm
+
+def profile_page(request):
+    user = request.user
+    profile = user.profile
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile_page')
+    else:
+        form = ProfileForm(instance=profile)
+
+    return render(request, 'accounts/profile.html', {'form': form})
+
+
+
+accounts/models.py
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nickname = models.CharField(max_length=100, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    favorites = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+
+Don't forget to create the Profile when a User is created. You can do this by using Django signals:
+
+In accounts/signals.py:
+
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+from .models import Profile
+
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+post_save.connect(create_profile, sender=User)
+
+Ensure signals.py is connected by importing it in accounts/apps.py:
+
+from django.apps import AppConfig
+
+class AccountsConfig(AppConfig):
+    name = 'accounts'
+
+    def ready(self):
+        import accounts.signals
+
+
+accounts/forms.py
+
+from django import forms
+from .models import Profile
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['nickname', 'date_of_birth', 'city', 'state', 'country', 'profile_picture', 'favorites']
+
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+            'country': forms.Select(choices=[('USA', 'USA'), ('India', 'India'), ('UK', 'UK'), ...]),  # Add more country choices
+        }
+
+
+accounts/templates/accounts/profile.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+</head>
+<body>
+    <h1>Profile Page</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Update Profile</button>
+    </form>
+</body>
+</html>
+
+
+
+
+Set up React in your Django project
+
+download node.js---
+
+# installs nvm (Node Version Manager)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+
+# download and install Node.js (you may need to restart the terminal)
+nvm install 20
+
+# verifies the right Node.js version is in the environment
+node -v # should print `v20.17.0`
+
+# verifies the right npm version is in the environment
+npm -v # should print `10.8.2`
+
+Create a new React App: In the root directory of your Django project, 
+run the following command to create a new React app:
+npx create-react-app frontend
+
+Serve React App via Django: After setting up your React app, 
+you’ll need to integrate it with Django. Use the django-webpack-loader to serve the React build files through Django.
+Install django-webpack-loader:
+
+pip install django-webpack-loader
+
+Set up webpack and django-webpack-loader: Add the following to your Django settings (settings.py):
+INSTALLED_APPS += [
+    'webpack_loader',
+]
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG,
+        'BUNDLE_DIR_NAME': 'frontend/static/frontend/',  # Path to webpack bundle
+        'STATS_FILE': os.path.join(BASE_DIR, 'frontend/webpack-stats.json'),
+    }
+}
+
+Now, add the django-webpack-loader configuration to your React app.
+
+Build your React app: Build your React app and serve the static files via Django:
+cd frontend
+npm run build
+
+Step 2: Create React Components for Signup, Login, and Profile Pages
+
+1. Signup Page (React)
+
+Create a Signup.js file inside the frontend/src/components/ directory.
+
+import React, { useState } from "react";
+import axios from "axios";
+
+function Signup() {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: ""
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("/accounts/signup/", formData);
+      alert("Signup successful!");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="signup-form">
+      <h2>Signup</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Username</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+        </div>
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
+  );
+}
+
+export default Signup;
+
+2. Login Page (React)
+
+Create a Login.js file inside frontend/src/components/.
+
+import React, { useState } from "react";
+import axios from "axios";
+
+function Login() {
+  const [formData, setFormData] = useState({
+    username: "",
+    password: ""
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("/accounts/login/", formData);
+      alert("Login successful!");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="login-form">
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Username</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+}
+
+export default Login;
+
+3. Profile Page (React)
+
+Create a Profile.js file inside frontend/src/components/.
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+function Profile() {
+  const [profileData, setProfileData] = useState({
+    nickname: "",
+    date_of_birth: "",
+    city: "",
+    state: "",
+    country: "",
+    profile_picture: "",
+    favorites: "",
+    email: "",
+    phone: ""
+  });
+
+  const handleChange = (e) => {
+    setProfileData({
+      ...profileData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("/accounts/profile/", profileData);
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch current profile data
+    async function fetchProfile() {
+      try {
+        const response = await axios.get("/accounts/profile/");
+        setProfileData(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchProfile();
+  }, []);
+
+  return (
+    <div className="profile-page">
+      <h2>Profile Page</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Nickname</label>
+          <input
+            type="text"
+            name="nickname"
+            value={profileData.nickname}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Date of Birth</label>
+          <input
+            type="date"
+            name="date_of_birth"
+            value={profileData.date_of_birth}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>City</label>
+          <input
+            type="text"
+            name="city"
+            value={profileData.city}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>State</label>
+          <input
+            type="text"
+            name="state"
+            value={profileData.state}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Country</label>
+          <select
+            name="country"
+            value={profileData.country}
+            onChange={handleChange}
+          >
+            <option value="USA">USA</option>
+            <option value="India">India</option>
+            <option value="UK">UK</option>
+            {/* Add more countries here */}
+          </select>
+        </div>
+        <div>
+          <label>Favorites</label>
+          <input
+            type="text"
+            name="favorites"
+            value={profileData.favorites}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={profileData.email}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Phone</label>
+          <input
+            type="tel"
+            name="phone"
+            value={profileData.phone}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Profile Picture</label>
+          <input
+            type="file"
+            name="profile_picture"
+            onChange={(e) =>
+              setProfileData({ ...profileData, profile_picture: e.target.files[0] })
+            }
+          />
+        </div>
+        <button type="submit">Update Profile</button>
+      </form>
+    </div>
+  );
+}
+
+export default Profile;
+
+
+Step 3: Routing Between Components
+Use React Router to manage the routing between your Signup, Login, and Profile pages.
+
+Install React Router:
+npm install react-router-dom
+
+Configure Routing in App.js:
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Signup from "./components/Signup";
+import Login from "./components/Login";
+import Profile from "./components/Profile";
+
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route exact path="/signup" component={Signup} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/profile" component={Profile} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+
+Step 4: Test the Application
+
+python manage.py runserver
+
+Start the React app in development mode:
+cd frontend
+npm start
+
+
+Axios --
+Create a New File:
+Go to your frontend/src directory.
+Create a new file named axios.js.
+
+// src/axios.js
+import axios from 'axios';
+
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
+
+// Set the CSRF token in Axios defaults
+axios.defaults.headers.common['X-CSRFToken'] = getCookie('csrftoken');
+axios.defaults.baseURL = 'http://localhost:8000'; // Your Django backend URL
+
+export default axios;
+
+Import the Configured Axios in Your Components:
+In your components (like Signup.js or any other component where you make API calls), 
+import the configured Axios instance instead of the default one. For example:
+
+import axios from '../axios'; // Adjust the path if needed
+
+
+
+
+
+
+now for restarant list -
+
+created api.js
+
+import axios from 'axios';
+
+const YELP_API_KEY = 'o1b6sAfSMLNCsQ8XlSb71wW_CyhZLFwH-16Wuz10OoMLGXQfuEnz4YmOHOOI9DPSSmb8FrV5vtEh5jXoSIf35vP3mNL1WwpaXKyHxDHC6NQDmoqwyGKjrJeJDkj_ZnYx';
+const BASE_URL = 'https://api.yelp.com/v3/businesses/search';
+
+export const fetchRestaurants = async (location) => {
+  try {
+    const response = await axios.get(BASE_URL, {
+      headers: {
+        Authorization: `Bearer ${YELP_API_KEY}`,
+      },
+      params: {
+        location: location,
+        limit: 10, // You can change the limit as per your need
+      },
+    });
+    return response.data.businesses; // This will return the list of restaurants
+  } catch (error) {
+    console.error('Error fetching restaurants:', error);
+    throw error;
+  }
+};
+
+
+Use the function to fetch and display data in your component. For example, in a component called RestaurantList.js, you can do the following:
+
+import React, { useEffect, useState } from 'react';
+import { fetchRestaurants } from './api'; // Adjust the path as needed
+
+const RestaurantList = () => {
+  const [restaurants, setRestaurants] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadRestaurants = async () => {
+      try {
+        const data = await fetchRestaurants('San Francisco'); // You can replace 'San Francisco' with the desired location
+        setRestaurants(data);
+      } catch (err) {
+        setError('Failed to fetch restaurants');
+      }
+    };
+
+    loadRestaurants();
+  }, []);
+
+  return (
+    <div>
+      <h2>Restaurants</h2>
+      {error && <p>{error}</p>}
+      <ul>
+        {restaurants.map((restaurant) => (
+          <li key={restaurant.id}>
+            <h3>{restaurant.name}</h3>
+            <img src={restaurant.image_url} alt={restaurant.name} />
+            <p>{restaurant.location.address1}, {restaurant.location.city}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default RestaurantList;
+
+and then reder this request in restaurant.js
+
+
+Step 4: Handle CORS Issues
+Since you're experiencing CORS issues, consider the following solutions:
+
+Proxy Configuration: In your frontend/package.json, add a proxy to your Django backend:
+
+"proxy": "http://localhost:8000",
+
+
+Use a Backend Proxy
+
+Create a Proxy Endpoint: Instead of making requests directly to the Yelp API from your frontend, create an endpoint in your Django backend that will handle the request to the Yelp API. This way, your React app will call your backend, and your backend will call the Yelp API.
+Here's how to do it:
+
+Step 1: Create a new view in your Django app that handles the Yelp API request. For example, you can create a view in your views.py like this:
+
+import requests
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+@api_view(['GET'])
+def yelp_search(request):
+    location = request.query_params.get('location', 'San Francisco')
+    headers = {
+        'Authorization': 'Bearer YOUR_YELP_API_KEY',
+    }
+    params = {
+        'location': location,
+        'limit': 10,
+    }
+    response = requests.get('https://api.yelp.com/v3/businesses/search', headers=headers, params=params)
+    return Response(response.json())
+
+
+
+Step 2: Update your urls.py to include the new endpoint:
+
+from django.urls import path
+from .views import yelp_search
+
+urlpatterns = [
+    path('api/yelp/search/', yelp_search, name='yelp_search'),
+    # Other paths...
+]
+
+
+Step 3: Update your api.js to call this new endpoint instead of the Yelp API directly:
+
+const BASE_URL = 'http://localhost:8000/api/yelp/search/';
+
+export const fetchRestaurants = async (location) => {
+  try {
+    const response = await axios.get(BASE_URL, {
+      params: {
+        location: location,
+      },
+    });
+    return response.data.businesses; // Return the list of restaurants
+  } catch (error) {
+    console.error('Error fetching restaurants:', error);
+    throw error;
+  }
+};
+
+
+

@@ -6,9 +6,16 @@
     <title>UberEats Dashboard</title>
 </head>
 <body>
-    <h2>Welcome to the UberEats Dashboard</h2>
-    <p>This is a placeholder for the UberEats dashboard.</p>
-    <img src="https://via.placeholder.com/300x200" alt="Dashboard Placeholder">
+    <ul>
+        <li><a href="{% url 'profile_page' %}">Profile Page</a></li>
+        <li><a href="#">Restaurant Tab</a></li>  <!-- This tab will be implemented later -->
+    </ul>
+
+    <div>
+        <!-- Content for each tab will be loaded here -->
+        {% block content %}
+        {% endblock %}
+    </div>
     <br><br>
     <a href="{% url 'logout' %}">Logout</a>
 </body>
