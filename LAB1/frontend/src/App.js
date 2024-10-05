@@ -48,9 +48,9 @@ function App() {
 
           {/* Dashboard route */}
           <Route path="/dashboard" element={<Dashboard />}>
-            <Route path="profile" element={<Profile />} />
             <Route path="restaurant" element={<Restaurant />} />
           </Route>
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </div>
     </Router>
