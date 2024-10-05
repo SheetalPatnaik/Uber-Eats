@@ -37,7 +37,7 @@ function App() {
   return (
     <Router>
       <div>
-        <h1>Welcome to Uber Eats Clone</h1>
+        {/* <h1>Welcome to Uber Eats Clone</h1> */}
         <Routes>
           {/* Redirect to signup first */}
           <Route path="/" element={<Navigate to="/signup" />} />
