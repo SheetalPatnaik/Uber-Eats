@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   AppBar,
@@ -11,13 +11,14 @@ import {
 } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material"; // Import Material-UI AccountCircle icon
 import logo from '../uber_Eats_logo_2.png'; // Import the logo
+import RestaurantList from './RestaurantList'; // Import the RestaurantList component
 
 function Dashboard() {
   const navigate = useNavigate();
 
   // Function to navigate to the user profile
   const handleProfileClick = () => {
-    navigate("/dashboard/profile");
+    navigate("/profile");
   };
 
   return (
@@ -54,7 +55,7 @@ function Dashboard() {
         {/* Main Content */}
         <Container component="main" maxWidth="lg" sx={{ mt: 4, mb: 2, flexGrow: 1 }}>
           <Box sx={{ mt: 4 }}>
-            <Outlet /> {/* Render child routes */}
+            <RestaurantList /> {/* Render the RestaurantList component directly */}
           </Box>
         </Container>
 
@@ -83,3 +84,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
