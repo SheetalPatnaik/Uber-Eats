@@ -32,7 +32,7 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Dashboard from "./components/Dashboard";
 import Restaurant from "./components/Restaurant";
-
+import RestaurantDashboard from "./components/RestaurantDashboard";
 function App() {
   return (
     <Router>
@@ -46,6 +46,10 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
 
+
+          <Route path="/restaurantdashboard" element={<RestaurantDashboard />}>
+            {/* <Route path="restaurant" element={<Restaurant />} /> */}
+          </Route>
           {/* Dashboard route */}
           <Route path="/dashboard" element={<Dashboard />}>
             <Route path="restaurant" element={<Restaurant />} />
