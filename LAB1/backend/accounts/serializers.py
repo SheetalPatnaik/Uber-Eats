@@ -13,6 +13,15 @@ from rest_framework import serializers
 from .models import Profile
 from django.contrib.auth.models import User
 
+# from .models import CustomUser
+
+# class CustomUserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = CustomUser
+#         fields = ['user_type', 'username', 'email', 'password', 'restaurant_name', 'address', 'upload_image']
+
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)  # Get email from User model
     username = serializers.CharField(source='user.username', read_only=True)  # Get username from User model

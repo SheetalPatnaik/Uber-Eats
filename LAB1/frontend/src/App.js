@@ -33,6 +33,8 @@ import Profile from "./components/Profile";
 import Dashboard from "./components/Dashboard";
 import Restaurant from "./components/Restaurant";
 import RestaurantDashboard from "./components/RestaurantDashboard";
+import RestLogin from './components/RestLogin'; 
+
 function App() {
   return (
     <Router>
@@ -55,6 +57,7 @@ function App() {
             <Route path="restaurant" element={<Restaurant />} />
           </Route>
           <Route path="/profile" element={<Profile />} />
+          <Route path="/restlogin" element={<RestLogin />} />
         </Routes>
       </div>
     </Router>

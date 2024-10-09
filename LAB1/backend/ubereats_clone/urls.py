@@ -22,7 +22,8 @@ from accounts.views import search_restaurants
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('accounts/', include('accounts.urls')),
-    path('api/yelp/search/', search_restaurants, name='search_restaurants'),  # Add this line
+    path('api/restaurants/', search_restaurants, name='search_restaurants'),
+    # path('api/', search_restaurants, name='search_restaurants'),  # Add this line
 ]
 
 if settings.DEBUG:
