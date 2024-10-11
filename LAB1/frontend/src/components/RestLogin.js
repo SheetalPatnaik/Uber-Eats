@@ -38,8 +38,9 @@ function RestaurantLogin() {
       const response = await axios.post("http://localhost:8000/accounts/api/rest/login/", formData); // Update the endpoint as needed
 
       // Check for a redirect response
-      if (response.data.redirect) {
-        navigate(response.data.redirect); // Redirect to the specified dashboard
+      if (response.status === 200) {
+        // Assuming login was successful, redirect to the dashboard
+        navigate("/restaurant/updatemenu"); // Update the route if needed
       }
     } catch (err) {
       console.error(err);
