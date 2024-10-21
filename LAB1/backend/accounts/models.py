@@ -28,9 +28,6 @@ class RestaurantOwner(models.Model):
     
 
 
-
-
-
 class UserProfile(models.Model):
     USER_TYPES = (
         ('customer', 'Customer'),
@@ -42,4 +39,29 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
+
+### for menu
+class MenuItem(models.Model):
+    CATEGORY_CHOICES = [
+        ('cocktail', 'Cocktail'),
+        ('mocktail', 'Mocktail'),
+        # Add more categories as needed
+    ]
+
+    STATUS_CHOICES = [
+        ('available', 'Available'),
+        ('not_available', 'Not Available'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Assuming the restaurant owner is tied to the User model
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    image = models.ImageField(upload_to='menu_images/',blank=True, null=True)  # Image upload
+    price = models.DecimalField(max_digits=6, decimal_places=2)  # e.g. 9999.99
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='available')  # New status field
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
 

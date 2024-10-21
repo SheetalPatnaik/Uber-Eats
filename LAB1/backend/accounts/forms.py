@@ -16,3 +16,13 @@ class ProfileForm(forms.ModelForm):
                 # Add more country choices as needed
             ]),
         }
+
+
+
+##menuitem form 
+from .models import MenuItem
+
+class MenuItemForm(forms.ModelForm):
+    class Meta:
+        model = MenuItem
+        fields = ['category', 'name', 'description', 'image', 'price']

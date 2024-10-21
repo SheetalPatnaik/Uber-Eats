@@ -18,11 +18,12 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import search_restaurants
+from accounts.views import search_restaurants,add_menu_item
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('api/restaurants/', search_restaurants, name='search_restaurants'),
+    path('api/updatemenu/', add_menu_item, name='add_menu_item'),
     # path('api/', search_restaurants, name='search_restaurants'),  # Add this line
 ]
 

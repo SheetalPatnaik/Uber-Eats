@@ -33,3 +33,17 @@ class ProfileSerializer(serializers.ModelSerializer):
     def validate_date_of_birth(self, value):
         # Custom validation to ensure the date is in the right format if needed
         return value
+
+
+##menu
+
+# serializers.py
+from .models import MenuItem
+
+class MenuItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MenuItem
+        fields = ['id', 'category', 'name', 'description', 'price', 'image', 'created_at','status']
+        extra_kwargs = {
+            'image': {'required': False}  # Make image optional
+        }

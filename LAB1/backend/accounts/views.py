@@ -20,79 +20,6 @@ import requests
 
 from django.contrib.auth.hashers import make_password
 
-# Signup view
-# @csrf_exempt
-# @api_view(['POST'])
-# def signup(request):
-#     username = request.data.get('username')
-#     email = request.data.get('email')
-#     password = request.data.get('password')
-
-#     # Validate that all fields are provided
-#     if not username or not email or not password:
-#         return Response({"error": "All fields are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     # Check for existing username
-#     if User.objects.filter(username=username).exists():
-#         return Response({"error": "Username already exists. Try another one!"}, status=status.HTTP_400_BAD_REQUEST)
-
-#     # Check for existing email
-#     if User.objects.filter(email=email).exists():
-#         return Response({"error": "Email already registered. Please Login!"}, status=status.HTTP_400_BAD_REQUEST)
-
-#     # Create the new user
-#     user = User.objects.create_user(username=username, email=email, password=password)
-#     user.save()
-
-#     return Response({"message": "User created successfully."}, status=status.HTTP_201_CREATED)
-
-
-
-
-# @api_view(['POST'])
-# def signup(request):
-#     user_type = request.data.get('user_type')  # Field to determine the user type
-#     username = request.data.get('username')
-#     email = request.data.get('email')
-#     password = request.data.get('password')
-
-#     # Additional fields for restaurant owner
-#     restaurant_name = request.data.get('restaurant_name')
-#     address = request.data.get('address')
-#     profile_picture = request.data.get('profile_picture')
-
-#     # Validate that the basic fields are provided
-#     if not username or not email or not password or not user_type:
-#         return Response({"error": "All fields are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     # Check for existing username and email
-#     if User.objects.filter(username=username).exists():
-#         return Response({"error": "Username already exists. Try another one!"}, status=status.HTTP_400_BAD_REQUEST)
-    
-#     if User.objects.filter(email=email).exists():
-#         return Response({"error": "Email already registered. Please Login!"}, status=status.HTTP_400_BAD_REQUEST)
-
-#     # Create the new user
-#     user = User.objects.create_user(username=username, email=email, password=password)
-#     user.save()
-
-#     # If the user is a restaurant owner, save the restaurant owner details
-#     if user_type == 'restaurant_owner':
-#         # Validate that restaurant-specific fields are provided
-#         if not restaurant_name or not address:
-#             return Response({"error": "Restaurant name and address are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Create the RestaurantOwner instance and associate with the user
-#         restaurant_owner = RestaurantOwner(
-#             user=user,  # Link to the created user
-#             restaurant_name=restaurant_name,
-#             address=address,
-#             profile_picture=profile_picture  # Make sure this is handled appropriately
-#         )
-#         restaurant_owner.save()
-
-#     return Response({"message": "User created successfully."}, status=status.HTTP_201_CREATED)
-
 
 
 
@@ -154,16 +81,15 @@ def signup(request):
 
 @api_view(['POST'])
 def rest_login(request):
-    username = request.data.get('username')
+    rest_username = request.data.get('username')  # Renamed variable for clarity
     password = request.data.get('password')
 
     # Logic to check if the user is a restaurant owner
-    user = authenticate(username=username, password=password)
-    if user is not None:
+    rest_user = authenticate(username=rest_username, password=password)  # Renamed variable for clarity
+    if rest_user is not None:
         # Check if this user is a restaurant owner
-        if hasattr(user, 'restaurantowner'):
-            # Successful login logic
-            # return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
+        if hasattr(rest_user, 'restaurantowner'):  # Ensure the user has a restaurant owner profile
+            login(request, rest_user)  # Log in the restaurant owner
             return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Not authorized as restaurant owner."}, status=status.HTTP_403_FORBIDDEN)
@@ -173,22 +99,6 @@ def rest_login(request):
 
 
 
-
-# Login view
-# def login_user(request):
-#     if request.method == 'POST':
-#         username = request.POST.get('username')
-#         password = request.POST.get('password')
-
-#         user = authenticate(request, username=username, password=password)
-
-#         if user is not None:
-#             login(request, user)
-#             return redirect('dashboard')  # Redirect to the dashboard after login
-#         else:
-#             return render(request, 'accounts/login.html', {'error': 'Invalid credentials'})
-
-#     return render(request, 'accounts/login.html')
 
 @api_view(['POST'])
 def login_user(request):
@@ -247,22 +157,6 @@ def profile_view(request):
 
 
 
-
-# @api_view(['GET'])
-# def yelp_search(request):
-#     location = request.query_params.get('location', 'San Francisco')
-#     headers = {
-#         'Authorization': 'Bearer YOUR_YELP_API_KEY',
-#     }
-#     params = {
-#         'location': location,
-#         'limit': 10,
-#     }
-#     response = requests.get('https://api.yelp.com/v3/businesses/search', headers=headers, params=params)
-#     return Response(response.json())
-
-
-
 # views.py
 # from django.http import JsonResponse
 from .models import RestaurantOwner
@@ -281,27 +175,70 @@ def search_restaurants(request):
 
 
 
+## menu iems view
+from .models import MenuItem
+from .serializers import MenuItemSerializer
+
+@login_required
+def add_menu_item(request):
+    if request.method == 'POST':
+        print("Logged-in user:", request.user)
+        print(f"Logged-in user: {request.user} (ID: {request.user.id})")
+
+        # Log the POST data
+        print("POST data received:", request.POST)
+
+        # Extract form data
+        category = request.POST.get('category')
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
+        status = request.POST.get('status')
+        image = request.FILES.get('image')
+
+    try:
+        # Create or update the MenuItem
+        menu_item = MenuItem(
+            category=category,
+            name=name,
+            description=description,
+            price=price,
+            status=status,
+            image=image,
+            user=request.user  # Set the logged-in user as the owner
+        )
+        menu_item.save()
+        return Response({'message': 'Menu item added successfully', 'item': MenuItemSerializer(menu_item).data})
+    except Exception as e:
+        print(f"Error saving menu item: {str(e)}")  # Log the error
+        return Response({'error': str(e)}, status=400)
 
 
-##got restaurants from API
 
-# YELP_API_KEY = 'hgb0K92RUziF7C0BeOdy1WHRp_TJQmtcNkDNGjJ6M8Nqig6ZL-3nnxtlvf23g6_TPE49tGqUFzQYUGS2LVOZDOZQp4RT83wiKWedfQEPBtYRmxm_cq75DbVsRln_ZnYx'  # Use your actual API key
 
-# @api_view(['GET'])
-# def search_restaurants(request):
-#     location = request.GET.get('location')
-    
-#     if not location:
-#         return Response({'error': 'Location parameter is required'}, status=400)
+##fetch menu items
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_menu_items(request):
+    user = request.user  # Get the logged-in user
+    items = MenuItem.objects.filter(user=user)  # Only get items for the logged-in user
+    serializer = MenuItemSerializer(items, many=True)
+    return Response(serializer.data)
 
-#     headers = {
-#         'Authorization': f'Bearer {YELP_API_KEY}',
-#     }
 
-#     url = f'https://api.yelp.com/v3/businesses/search?location={location}'
-#     response = requests.get(url, headers=headers)
 
-#     if response.status_code == 200:
-#         return Response(response.json())
-#     else:
-#         return Response(response.json(), status=response.status_code)
+## PUT request to update data when user updates menu items
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_menu_item(request, pk):
+    user = request.user
+    try:
+        item = MenuItem.objects.get(id=pk, user=user)  # Make sure the user owns the item
+    except MenuItem.DoesNotExist:
+        return Response({'error': 'Item not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = MenuItemSerializer(item, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()  # Save updated item
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

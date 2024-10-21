@@ -34,6 +34,7 @@ import Dashboard from "./components/Dashboard";
 import Restaurant from "./components/Restaurant";
 import RestaurantDashboard from "./components/RestaurantDashboard";
 import RestLogin from './components/RestLogin'; 
+import MenuItemForm from './components/MenuItemForm';
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
           </Route>
           <Route path="/profile" element={<Profile />} />
           <Route path="/restlogin" element={<RestLogin />} />
+          <Route path="/restaurant/updatemenu" element={<MenuItemForm />} />
         </Routes>
       </div>
     </Router>
