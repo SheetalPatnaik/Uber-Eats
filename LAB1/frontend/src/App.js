@@ -35,6 +35,7 @@ import Restaurant from "./components/Restaurant";
 import RestaurantDashboard from "./components/RestaurantDashboard";
 import RestLogin from './components/RestLogin'; 
 import MenuItemForm from './components/MenuItemForm';
+import MenuPage from './components/MenuPage';
 
 function App() {
   return (
@@ -60,6 +61,11 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/restlogin" element={<RestLogin />} />
           <Route path="/restaurant/updatemenu" element={<MenuItemForm />} />
+
+          {/* Route for MenuPage - This displays menu items based on restaurant owner's username */}
+          <Route path="/menu/:username" element={<MenuPage />} />
+
+
         </Routes>
       </div>
     </Router>
