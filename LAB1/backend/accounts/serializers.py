@@ -10,7 +10,7 @@
 
 # serializers.py
 from rest_framework import serializers
-from .models import Profile
+from .models import Profile,RestaurantOwner
 from django.contrib.auth.models import User
 
 # from .models import CustomUser
@@ -47,3 +47,20 @@ class MenuItemSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'image': {'required': False}  # Make image optional
         }
+
+
+
+# ##serializing for restaurant infor
+# from rest_framework import generics
+# from .models import Restaurant
+# from .serializers import RestaurantSerializer
+
+# class RestaurantListView(generics.ListAPIView):
+#     queryset = Restaurant.objects.all()
+#     serializer_class = RestaurantSerializer
+
+# # In your serializer, make sure you include the username
+# class RestaurantSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Restaurant
+#         fields = ['id', 'restaurant_name', 'address', 'profile_picture', 'username', 'created_at']  # Include username here

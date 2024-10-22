@@ -19,7 +19,7 @@ from .serializers import ProfileSerializer
 import requests
 
 from django.contrib.auth.hashers import make_password
-
+from .models import MenuItem, User
 
 
 
@@ -166,7 +166,7 @@ logger = logging.getLogger(__name__)
 
 def search_restaurants(request):
     try:
-        restaurants = RestaurantOwner.objects.all().values('restaurant_name', 'profile_picture', 'address','created_at')
+        restaurants = RestaurantOwner.objects.all().values('restaurant_name', 'profile_picture', 'address','created_at','user__username')
         logger.info(f"Fetched {len(restaurants)} restaurants")
         return JsonResponse(list(restaurants), safe=False)
     except Exception as e:
@@ -236,9 +236,61 @@ def update_menu_item(request, pk):
         item = MenuItem.objects.get(id=pk, user=user)  # Make sure the user owns the item
     except MenuItem.DoesNotExist:
         return Response({'error': 'Item not found'}, status=status.HTTP_404_NOT_FOUND)
-
+    print(request.data)
     serializer = MenuItemSerializer(item, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()  # Save updated item
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+##get menu for customer
+from django.shortcuts import get_object_or_404
+from .models import MenuItem, RestaurantOwner
+import logging
+
+logger = logging.getLogger(__name__)
+
+@api_view(['GET'])
+def get_menu_for_cust(request, username):
+    """
+    Fetch menu items for the restaurant based on the restaurant owner's username.
+    """
+    logger.info(f"Fetching menu for restaurant owner with username: {username}")
+
+    # Get the RestaurantOwner based on the username of the restaurant owner
+    try:
+        restaurant_owner = get_object_or_404(RestaurantOwner, user__username=username)
+        print(f"Found restaurant owner: {restaurant_owner}")
+    except Exception as e:
+        print(f"Error fetching restaurant owner: {e}")
+        return JsonResponse({'error': 'Restaurant owner not found'}, status=404)
+
+    # Filter MenuItems where the user (restaurant owner) matches
+    menu_items = MenuItem.objects.filter(user=restaurant_owner.user)
+
+    if not menu_items:
+        print("No menu items found for this restaurant owner.")
+        return JsonResponse({'error': 'No menu items found'}, status=404)
+
+    # Prepare menu data to send as JSON response
+    menu_data = [
+        {
+            'name': item.name,
+            'category': item.category,
+            'description': item.description,
+            'price': item.price,
+            'status': item.status,
+            'image': item.image.url if item.image else None,
+        }
+        for item in menu_items
+    ]
+    
+    print(f"Menu items fetched: {menu_data}")  # Debug print
+
+    # Return the menu data as a JSON response
+    return JsonResponse(menu_data, safe=False)
+
+
+
+
