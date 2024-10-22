@@ -3,8 +3,11 @@ import axios from 'axios';
 import { Card, CardMedia, CardContent, Typography, Grid } from '@mui/material';
 import './RestaurantList.css'; // Import the CSS file for additional styles
 
+import { useNavigate } from 'react-router-dom';
+
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
+  const navigate = useNavigate();
 
   const hardcodedRestaurants = [
     {
@@ -52,11 +55,21 @@ const RestaurantList = () => {
       });
   }, []);
 
+
+  // Function to handle the restaurant click
+  const handleRestaurantClick = (username) => {
+    console.log('Navigating to:', username);
+    navigate(`/menu/${username}`);
+  };
+
   return (
     <Grid container spacing={2} justifyContent="center">
       {restaurants.map((restaurant, index) => (
         <Grid item xs={12} sm={6} md={4} key={index}>
-          <Card className="restaurant-card">
+          <Card className="restaurant-card"  
+          onClick={() => handleRestaurantClick(restaurant.user__username)} // Add onClick handler here
+          style={{ cursor: 'pointer' }} // Add pointer cursor to indicate it's clickable
+        >
             <CardMedia
               component="img"
               image={restaurant.profile_picture ? restaurant.profile_picture : 'path_to_default_image'}
