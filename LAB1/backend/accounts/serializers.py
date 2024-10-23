@@ -64,3 +64,71 @@ class MenuItemSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Restaurant
 #         fields = ['id', 'restaurant_name', 'address', 'profile_picture', 'username', 'created_at']  # Include username here
+
+
+# serializers.py
+# from rest_framework import serializers
+# from .models import Order  # Import your Order model
+
+# class OrderSerializer(serializers.ModelSerializer):
+#     customer = serializers.CharField(source='customer.username')  # Get the username instead of the customer ID
+#     class Meta:
+#         model = Order
+#         fields = ['order_id', 'customer', 'order_items', 'order_status', 'created_at']
+
+
+
+# from rest_framework import serializers
+# from .models import Order
+
+# class OrderSerializer(serializers.ModelSerializer):
+#     customer = serializers.CharField(source='customer.username')  # Get the username
+#     restaurant = serializers.CharField(source='restaurant.user.username')  # Get the restaurant owner's username
+    
+#     class Meta:
+#         model = Order
+#         fields = ['order_id', 'customer', 'restaurant', 'order_items', 'order_status', 'created_at']
+#         read_only_fields = ['order_id', 'customer', 'restaurant', 'order_items', 'created_at']  # These fields should remain read-only
+
+#     def update(self, instance, validated_data):
+#         instance.order_status = validated_data.get('order_status', instance.order_status)
+#         instance.save()
+#         return instance
+
+
+
+
+from rest_framework import serializers
+from .models import Order
+
+class OrderSerializer(serializers.ModelSerializer):
+    customer = serializers.CharField(source='customer.username')  # Get the username
+    restaurant = serializers.CharField(source='restaurant.user.username')  # Get the restaurant owner's username
+    
+    class Meta:
+        model = Order
+        fields = ['order_id', 'customer', 'restaurant', 'order_items', 'order_status', 'created_at']
+        read_only_fields = ['order_id', 'customer', 'restaurant', 'order_items', 'created_at']  # These fields should remain read-only
+
+    def update(self, instance, validated_data):
+        instance.order_status = validated_data.get('order_status', instance.order_status)
+        instance.save()
+        return instance
+
+
+
+
+
+
+
+#for cutomer view
+# serializers.py
+
+# from rest_framework import serializers
+# from .models import Order
+
+# class OrderSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Order
+#         fields = ['id', 'restaurant_name', 'order_items', 'status']  # Update with actual fields from your model
+

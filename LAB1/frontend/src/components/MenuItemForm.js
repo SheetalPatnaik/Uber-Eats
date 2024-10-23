@@ -18,6 +18,24 @@ import {
 import axios from 'axios';
 import axiosInstance from '../api/axiosInstance';
 
+
+
+  // Fetch CSRF token from cookies
+  const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
 const MenuItemForm = () => {
   const [category, setCategory] = useState('');
   const [name, setName] = useState('');
@@ -283,6 +301,16 @@ const MenuItemForm = () => {
   ))}
 </Grid>
 
+<Grid item xs={12}>
+  <Button 
+    variant="contained" 
+    color="secondary" 
+    sx={{ width: '100%', backgroundColor: '#d32f2f', '&:hover': { backgroundColor: '#b71c1c' } }}
+    onClick={() => window.location.href='/orders'}  // Redirect to orders page
+  >
+    View Orders
+  </Button>
+</Grid>
 
       <Snackbar open={snackOpen} autoHideDuration={6000} onClose={handleSnackClose}>
         <Alert onClose={handleSnackClose} severity="success" sx={{ width: '100%' }}>

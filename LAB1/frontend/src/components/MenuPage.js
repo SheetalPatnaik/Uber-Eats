@@ -17,16 +17,36 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Updated import
 import axios from 'axios';
 
 const MenuPage = () => {
   const { username } = useParams(); // Get the username from the URL
+  const navigate = useNavigate(); // Updated to use useNavigate
   const [menuItems, setMenuItems] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [snackOpen, setSnackOpen] = useState(false);
   const [snackMessage, setSnackMessage] = useState('');
   const [quantities, setQuantities] = useState({});
+
+
+  // Function to get the CSRF token from cookies
+  const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
+
 
   useEffect(() => {
     // Fetch the menu items for the restaurant with the given username
@@ -73,15 +93,39 @@ const MenuPage = () => {
     setQuantities((prev) => ({ ...prev, [id]: value }));
   };
 
+  // to place the order and items in model 
+  const handlePlaceOrder = () => {
+    axios.post('http://localhost:8000/api/place-order/', {
+      cartItems,
+      restaurantUsername: username,
+    })
+      .then((response) => {
+        setSnackMessage('Order placed successfully!');
+        setSnackOpen(true);
+        setCartItems([]); // Clear the cart after placing the order
+      })
+      .catch((error) => {
+        console.error('Error placing order:', error);
+        setSnackMessage('Failed to place order.');
+        setSnackOpen(true);
+      });
+  };
+
   const handleSnackClose = () => {
     setSnackOpen(false);
   };
+
+    // Function to navigate to CustomerOrdersPage
+    const handleViewOrders = () => {
+      navigate('/customer-orders'); // Navigate to the Customer Orders page
+    };
 
   return (
     <Paper sx={{ padding: 3, marginTop: 3, borderRadius: 2, boxShadow: 3 }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center', color: '#1976d2' }}>
         Menu for {username}
       </Typography>
+
 
       <Grid container spacing={2}>
         {menuItems.length > 0 ? (
@@ -163,6 +207,28 @@ const MenuPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* place order Button */}
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{ marginTop: 2 }}
+        onClick={handlePlaceOrder}
+        disabled={cartItems.length === 0}
+      >
+        Place Order
+      </Button>
+
+
+      {/* Button to navigate to Customer Orders page */}
+      <Button
+        variant="outlined"
+        color="secondary"
+        sx={{ marginTop: 2, marginLeft: 2 }}
+        onClick={handleViewOrders}
+      >
+        View Your Orders
+      </Button>
 
       <Snackbar open={snackOpen} autoHideDuration={6000} onClose={handleSnackClose}>
         <Alert onClose={handleSnackClose} severity="success" sx={{ width: '100%' }}>

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile,RestaurantOwner,MenuItem
+from .models import Profile,RestaurantOwner,MenuItem,Order
 
 
 # Register your models here.
@@ -20,3 +20,12 @@ class MenuItemAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description', 'category', 'user__username']  # Allow searching by the username of the user
 
 admin.site.register(MenuItem, MenuItemAdmin)
+
+
+admin.site.register(Order)
+
+# @admin.register(Order)
+# class OrderAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'customer_name', 'restaurant', 'order_status', 'created_at')
+#     search_fields = ('customer_name', 'restaurant__username')
+#     list_filter = ('order_status',)
