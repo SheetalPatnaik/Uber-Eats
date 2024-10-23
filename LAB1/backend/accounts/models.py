@@ -65,3 +65,19 @@ class MenuItem(models.Model):
     def __str__(self):
         return self.name
 
+
+
+
+## to save customer orders
+from django.utils import timezone
+
+class Order(models.Model):
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user placing the order
+    restaurant = models.ForeignKey(RestaurantOwner, on_delete=models.CASCADE)  # Assuming restaurant is linked to RestaurantOwner
+    order_items = models.JSONField()  # To store the items and quantities (or adjust as necessary)
+    order_status = models.CharField(max_length=50, default='placed')  # Default status as 'placed'
+    created_at = models.DateTimeField(default=timezone.now)  # Automatically set order creation time
+    order_id = models.CharField(max_length=100, unique=True)  # Unique order ID
+
+    def __str__(self):
+        return f"Order {self.order_id} by {self.customer.username} at {self.restaurant.user.username}"

@@ -294,3 +294,183 @@ def get_menu_for_cust(request, username):
 
 
 
+## to save the customer orders in model in backend
+
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Order, MenuItem, RestaurantOwner
+from django.contrib.auth.models import User
+import uuid
+import json
+
+@login_required  # Ensure the user is logged in
+def place_order(request):
+    if request.method == 'POST':
+        # Parse the JSON data from the request body
+        data = json.loads(request.body)
+
+        # Print the entire request data to the console for debugging
+        print("Request Data:", data)
+
+        # Get the logged-in user (customer)
+        customer = request.user
+
+        # Print the customer username
+        print("Customer Username:", customer.username)
+
+        # Get the restaurant username and order items from the request
+        restaurant_username = data.get('restaurantUsername')
+        order_items = data.get('cartItems')  # Assuming `cartItems` contains the items
+
+        # Print the restaurant username and order items
+        print("Restaurant Username:", restaurant_username)
+        print("Order Items:", order_items)
+
+        # Get the restaurant owner by user__username
+        restaurant = get_object_or_404(RestaurantOwner, user__username=restaurant_username)
+
+        # Generate a unique order ID
+        order_id = uuid.uuid4().hex[:10].upper()
+
+        # Print the restaurant and order ID for confirmation
+        print("Restaurant:", restaurant.restaurant_name)
+        print("Order ID:", order_id)
+
+        # Create the order object
+        order = Order.objects.create(
+            customer=customer,
+            restaurant=restaurant,
+            order_items=order_items,  # Make sure this field matches your model
+            order_status='placed',
+            order_id=order_id
+        )
+
+        # Return success response
+        return JsonResponse({'message': 'Order placed successfully!', 'order_id': order.order_id}, status=201)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+
+##to fetch the orders of that particular restaurant 
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from .models import Order
+from .serializers import OrderSerializer
+
+class RestaurantOrdersView(APIView):
+    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+
+    def get(self, request):
+        user = request.user  # Get the logged-in user
+        orders = Order.objects.filter(restaurant__user=user)  # Get orders for the restaurant owned by the user
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+    def put(self, request, order_id):
+        try:
+            order = Order.objects.get(order_id=order_id, restaurant__user=request.user)
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found or not authorized to update'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = OrderSerializer(order, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Order  # Replace with your actual model
+from .serializers import OrderSerializer  # Replace with your actual serializer
+
+class OrderUpdateView(generics.UpdateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    lookup_field = 'order_id'  # Set the lookup field to order_id
+
+    def put(self, request, *args, **kwargs):
+        order_id = kwargs.get(self.lookup_field)
+        try:
+            order = self.get_object()
+            serializer = self.get_serializer(order, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error updating order: {e}")  # Log any errors
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+##fetch orders for customer view
+# views.py
+
+# views.py
+
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework import status
+# from .models import Order
+# from .serializers import OrderSerializer
+
+# class CustomerOrdersView(APIView):
+#     permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+
+#     def get(self, request):
+#         user = request.user  # Get the logged-in user
+#         orders = Order.objects.filter(customer=user)  # Get orders for the customer
+#         serializer = OrderSerializer(orders, many=True)
+#         return Response(serializer.data)
+
+#     def put(self, request, order_id):
+#         try:
+#             order = Order.objects.get(id=order_id, customer=request.user)  # Use 'id' instead of 'order_id'
+#         except Order.DoesNotExist:
+#             return Response({'error': 'Order not found or not authorized to update'}, status=status.HTTP_404_NOT_FOUND)
+        
+#         serializer = OrderSerializer(order, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from .models import Order
+from .serializers import OrderSerializer
+
+class CustomerOrdersView(APIView):
+    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+
+    def get(self, request):
+        user = request.user  # Get the logged-in user
+        orders = Order.objects.filter(customer=user)  # Get orders for the customer
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+    def put(self, request, order_id):
+        try:
+            order = Order.objects.get(id=order_id, customer=request.user)  # Get the order for the logged-in customer
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found or not authorized to update'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = OrderSerializer(order, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
