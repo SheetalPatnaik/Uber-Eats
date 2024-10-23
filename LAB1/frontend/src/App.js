@@ -24,8 +24,7 @@
 
 // export default App;
 
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
@@ -36,8 +35,21 @@ import RestaurantDashboard from "./components/RestaurantDashboard";
 import RestLogin from './components/RestLogin'; 
 import MenuItemForm from './components/MenuItemForm';
 import MenuPage from './components/MenuPage';
+import OrdersPage from './components/OrdersPage';
+import CustomerOrdersPage from './components/CustomerOrdersPage';
 
 function App() {
+
+  const [username, setUsername] = useState('');
+  useEffect(() => {
+    // Retrieve the logged-in username dynamically from storage or API
+    const storedUsername = localStorage.getItem('loggedInUsername'); // Example: retrieve from localStorage
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
+
+
   return (
     <Router>
       <div>
@@ -64,7 +76,12 @@ function App() {
 
           {/* Route for MenuPage - This displays menu items based on restaurant owner's username */}
           <Route path="/menu/:username" element={<MenuPage />} />
+          
 
+          {/* Pass the dynamically fetched username to the OrdersPage */}
+          <Route path="/orders" element={<OrdersPage username={username} />} />
+
+          <Route path="/customer-orders" element={<CustomerOrdersPage />} />
 
         </Routes>
       </div>
