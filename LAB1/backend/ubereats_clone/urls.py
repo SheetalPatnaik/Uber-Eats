@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import search_restaurants,add_menu_item,get_menu_for_cust,place_order,RestaurantOrdersView,OrderUpdateView,CustomerOrdersView
+from accounts.views import search_restaurants,add_menu_item,get_menu_for_cust,place_order,RestaurantOrdersView,OrderUpdateView,customer_orders
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('accounts/', include('accounts.urls')),
@@ -29,7 +29,8 @@ urlpatterns = [
     path('api/place-order/', place_order, name='place-order'),
     path('api/restaurant-orders/', RestaurantOrdersView.as_view(), name='restaurant_orders'),
     path('api/restaurant-orders/<str:order_id>/', OrderUpdateView.as_view(), name='order-update'),
-    path('api/orders/<str:username>/', CustomerOrdersView.as_view(), name='customer-orders'),
+    # path('api/orders/<str:username>/', CustomerOrdersView.as_view(), name='customer-orders'),
+    path('api/customer-orders/', customer_orders, name='customer_orders'),
 ]
 
 if settings.DEBUG:

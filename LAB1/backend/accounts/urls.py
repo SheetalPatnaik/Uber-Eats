@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import signup, login_user, dashboard, logout_user, profile_view, search_restaurants,rest_login,add_menu_item,get_menu_items,update_menu_item,get_menu_for_cust,place_order,RestaurantOrdersView,OrderUpdateView,CustomerOrdersView
+from .views import signup, login_user, dashboard, logout_user, profile_view, search_restaurants,rest_login,add_menu_item,get_menu_items,update_menu_item,get_menu_for_cust,place_order,RestaurantOrdersView,OrderUpdateView,customer_orders
 from .views import search_restaurants
 urlpatterns = [
     path('signup/', signup, name='signup'),
@@ -19,5 +19,6 @@ urlpatterns = [
     path('api/restaurant-orders/', RestaurantOrdersView.as_view(), name='restaurant_orders'),
     path('api/restaurant-orders/<str:pk>/', OrderUpdateView.as_view(), name='order-update'),
     # path('api/orders/<str:username>/', CustomerOrdersView.as_view(), name='customer-orders'),
-    path('api/customer-orders/', CustomerOrdersView.as_view(), name='customer-orders'),
+    # path('api/customer-orders/', CustomerOrdersView.as_view(), name='customer-orders'),
+    path('api/customer-orders/', customer_orders, name='customer_orders'),
 ]
