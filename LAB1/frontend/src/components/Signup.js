@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import axios from '../axios.js';
 import { useNavigate } from "react-router-dom";
@@ -15,8 +14,8 @@ import {
   CssBaseline,
   Paper,
 } from "@mui/material";
-
 import logo from '../uber_Eats_logo_2.png';
+import './Signup.css'; // Import the CSS file for styles
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -74,6 +73,7 @@ function Signup() {
   return (
     <>
       <CssBaseline />
+      <div className="blur-background" />
       <Box
         sx={{
           display: 'flex',
@@ -231,4 +231,3 @@ function Signup() {
 }
 
 export default Signup;
-

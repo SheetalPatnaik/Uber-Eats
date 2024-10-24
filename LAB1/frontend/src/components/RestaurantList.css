@@ -50,3 +50,46 @@
     object-fit: cover; /* Maintain aspect ratio and cover the area */
   }
   
+  .restaurant-card {
+  transition: transform 0.3s ease; /* Smooth scaling on hover */
+}
+
+.restaurant-card:hover {
+  transform: scale(1.05); /* Slightly enlarge card on hover */
+}
+
+.restaurant-image {
+  height: 200px; /* Fixed height for images */
+  object-fit: cover; /* Ensures images cover the space without stretching */
+}
+
+@media (max-width: 600px) {
+  .restaurant-image {
+    height: 150px; /* Adjust image height for small screens */
+  }
+}
+
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/Users/aishwaryathorat/Movies/MSCourses/sem2/DS - Data 236/LABS/Uber-Eats/LAB1/frontend/src/restaurant.jpeg'); /* Set your background image here */
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px); /* Adjust the blur level */
+    z-index: -1; /* Send to back */
+}
+
+.restaurant-container {
+    padding: 20px;
+}
+
+.restaurant-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+
