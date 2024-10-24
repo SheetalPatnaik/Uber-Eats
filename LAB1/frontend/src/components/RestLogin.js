@@ -15,6 +15,7 @@ import {
   Paper,
 } from "@mui/material";
 import logo from '../uber_Eats_logo_2.png';
+import './RestLogin.css';
 
 function RestaurantLogin() {
   const [formData, setFormData] = useState({
@@ -51,6 +52,7 @@ function RestaurantLogin() {
   return (
     <>
       <CssBaseline />
+      <div className="blur-background1" />
       {/* Flex Container for the whole page */}
       <Box
         sx={{
