@@ -180,6 +180,7 @@ from .models import MenuItem
 from .serializers import MenuItemSerializer
 
 @login_required
+@api_view(['POST'])
 def add_menu_item(request):
     if request.method == 'POST':
         print("Logged-in user:", request.user)

@@ -17,11 +17,31 @@ import {
 import logo from '../uber_Eats_logo_2.png';
 import './Login.css'; // Import the CSS file for styles
 
+
+// Function to get the CSRF token from cookies
+const getCookie = (name) => {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+};
+
+
 function Login() {
   const [formData, setFormData] = useState({
     username: "",
     password: ""
   });
+
+
 
   const [errorMessage, setErrorMessage] = useState("");  // To handle the error message
   const navigate = useNavigate(); // To handle redirection

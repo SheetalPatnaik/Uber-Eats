@@ -101,12 +101,14 @@ const MenuItemForm = () => {
         formData.append(key, updatedData[key]);
       }
     });
-
+    console.log([...formData.entries()]);
+    console.log(formData.getAll('category'))
     try {
       let response;
       if (editMode) {
         response = await axiosInstance.put(`/accounts/api/menu-items/${editItemId}/`, formData, {
           headers: {
+            // 'Content-Type': 'application/json',
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
@@ -115,12 +117,14 @@ const MenuItemForm = () => {
       } else {
         response = await axiosInstance.post("/accounts/api/add-menu-item/", formData, {
           headers: {
+            // 'Content-Type': 'application/json',
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
         });
         if (response.data) {
           setMenuItems((prevItems) => [...prevItems, response.data]);
+          fetchMenuItems();
         }
       }
 
@@ -337,6 +341,9 @@ const MenuItemForm = () => {
           height="140"
           image={item.image}
           alt={item.name}
+          // sx={{
+          //   objectFit: 'cover',  // Ensures the image covers the area
+          // }}
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
