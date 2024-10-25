@@ -45,6 +45,12 @@ class MenuItem(models.Model):
     CATEGORY_CHOICES = [
         ('cocktail', 'Cocktail'),
         ('mocktail', 'Mocktail'),
+        ('burger', 'Burger'),
+        ('pizza', 'Pizza'),
+        ('starter', 'Starter'),
+        ('maincourse', 'Maincourse'),
+        ('dessert', 'Dessert'),
+
         # Add more categories as needed
     ]
 
