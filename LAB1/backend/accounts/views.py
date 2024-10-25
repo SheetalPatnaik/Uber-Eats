@@ -518,3 +518,37 @@ def customer_orders(request):
 
     # Return the constructed list as JSON
     return JsonResponse(order_list, safe=False)
+
+
+
+
+
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.decorators import login_required
+from .models import RestaurantOwner
+from .serializers import RestaurantOwnerSerializer
+
+@login_required
+@api_view(['GET', 'POST'])
+def restaurant_owner_profile_view(request):
+    try:
+        # Get the restaurant owner profile by matching the logged-in user
+        profile = RestaurantOwner.objects.get(user=request.user)
+    except RestaurantOwner.DoesNotExist:
+        return Response({"error": "Restaurant owner profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = RestaurantOwnerSerializer(profile)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = RestaurantOwnerSerializer(profile, data=request.data, partial=True)  # Partial update
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
