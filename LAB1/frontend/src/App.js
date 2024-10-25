@@ -37,6 +37,7 @@ import MenuItemForm from './components/MenuItemForm';
 import MenuPage from './components/MenuPage';
 import OrdersPage from './components/OrdersPage';
 import CustomerOrdersPage from './components/CustomerOrdersPage';
+import RestaurantOwnerProfile from "./components/RestaurantOwnerProfile";
 
 function App() {
 
@@ -82,6 +83,7 @@ function App() {
           <Route path="/orders" element={<OrdersPage username={username} />} />
 
           <Route path="/customer-orders" element={<CustomerOrdersPage />} />
+          <Route path="/restaurant-profile" element={<RestaurantOwnerProfile />} />
 
         </Routes>
       </div>

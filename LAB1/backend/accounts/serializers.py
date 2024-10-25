@@ -132,3 +132,13 @@ class OrderSerializer(serializers.ModelSerializer):
 #         model = Order
 #         fields = ['id', 'restaurant_name', 'order_items', 'status']  # Update with actual fields from your model
 
+
+
+
+from rest_framework import serializers
+from .models import RestaurantOwner
+
+class RestaurantOwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RestaurantOwner
+        fields = ['restaurant_name', 'address', 'profile_picture']

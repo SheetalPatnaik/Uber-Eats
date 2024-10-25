@@ -15,6 +15,7 @@ import {
   Alert,
 } from '@mui/material';
 import axios from 'axios';
+import './OrdersPage.css';
 
 const OrdersPage = ({ username }) => {
   const [orders, setOrders] = useState([]);
@@ -139,6 +140,8 @@ const OrdersPage = ({ username }) => {
   );
 
   return (
+    // <CssBaseline />
+      <div className="background-image-order-page">
     <Paper sx={{ padding: 3, marginTop: 3, borderRadius: 2, boxShadow: 3 }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center', color: '#1976d2' }}>
         Orders for {username} {/* Displaying the restaurant owner's username */}
@@ -154,6 +157,7 @@ const OrdersPage = ({ username }) => {
         </Alert>
       </Snackbar>
     </Paper>
+    </div>
   );
 };
 
