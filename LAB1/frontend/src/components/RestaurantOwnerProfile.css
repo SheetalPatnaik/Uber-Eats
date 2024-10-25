@@ -1,0 +1,12 @@
+.background-image-rest-profile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/Users/aishwaryathorat/Movies/MSCourses/sem2/DS - Data 236/LABS/Uber-Eats/LAB1/frontend/src/components/rest_profile1.jpeg'); /* Set your background image here */
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px); /* Adjust the blur level */
+    z-index: -1; /* Send to back */
+}

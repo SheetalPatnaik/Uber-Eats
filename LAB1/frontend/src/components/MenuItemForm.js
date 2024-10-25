@@ -14,27 +14,28 @@ import {
   Select,
   Snackbar,
   Alert,
+  Box,
 } from '@mui/material';
 import axios from 'axios';
 import axiosInstance from '../api/axiosInstance';
+import { useNavigate } from 'react-router-dom';
+import './MenuItemForm.css';
 
-
-
-  // Fetch CSRF token from cookies
-  const getCookie = (name) => {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
+// Fetch CSRF token from cookies
+const getCookie = (name) => {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
       }
     }
-    return cookieValue;
-  };
+  }
+  return cookieValue;
+};
 
 const MenuItemForm = () => {
   const [category, setCategory] = useState('');
@@ -49,11 +50,19 @@ const MenuItemForm = () => {
   const [originalItemData, setOriginalItemData] = useState({});
   const [snackMessage, setSnackMessage] = useState('');
   const [snackOpen, setSnackOpen] = useState(false);
-
+  
   const categories = [
     { value: 'cocktail', label: 'Cocktail' },
     { value: 'mocktail', label: 'Mocktail' },
+    { value: 'burger', label: 'Burger' },
+    { value: 'pizza', label: 'Pizza' },
+    { value: 'starter', label: 'Starter' },
+    { value: 'maincourse', label: 'Maincourse' },
+    { value: 'dessert', label: 'Dessert' },
+
   ];
+
+  const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
@@ -61,21 +70,18 @@ const MenuItemForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!editMode && !image) {
       setSnackMessage("Image is required");
       setSnackOpen(true);
       return;
     }
 
-    const data = { category, name, description, price, status,image };
+    const data = { category, name, description, price, status, image };
     const formData = new FormData();
 
     if (image) {
       formData.append('image', image);
     }
-
-   
 
     const updatedData = {};
     Object.keys(data).forEach((key) => {
@@ -140,23 +146,29 @@ const MenuItemForm = () => {
     setOriginalItemData({});
   };
 
+
+  const fetchMenuItems = async () => {
+    try {
+      const response = await axios.get("/accounts/api/menu-items/", {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      const updatedMenuItems = response.data.map(item => ({
+        ...item,
+        image: `${process.env.REACT_APP_API_URL}${item.image.startsWith('/') ? '' : '/'}${item.image}`,
+      }));
+      setMenuItems(updatedMenuItems);
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+    }
+  };
+
+
+
+
   useEffect(() => {
-    const fetchMenuItems = async () => {
-      try {
-        const response = await axios.get("/accounts/api/menu-items/", {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-        const updatedMenuItems = response.data.map(item => ({
-          ...item,
-          image: `${process.env.REACT_APP_API_URL}${item.image.startsWith('/') ? '' : '/'}${item.image}`,
-        }));
-        setMenuItems(updatedMenuItems);
-      } catch (error) {
-        console.error('Error fetching menu items:', error);
-      }
-    };
+    
     fetchMenuItems();
   }, []);
 
@@ -182,10 +194,32 @@ const MenuItemForm = () => {
   };
 
   return (
-    <Paper sx={{ padding: 3, marginTop: 3, borderRadius: 2, boxShadow: 3 }}>
+    <div className="background-container-menu">
+    <div className="content-wrapper">
+    <Paper sx={{ padding: 3, marginTop: 3, borderRadius: 2, boxShadow: 3, position: 'relative' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate('/restaurant-profile')}
+          sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#115293' } }}
+        >
+          Go to Profile
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => navigate('/orders')}
+          sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#115293' } }}
+        >
+          Show Orders
+        </Button>
+      </Box>
+
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center', color: '#1976d2' }}>
         {editMode ? 'Update Menu Item' : 'Add Menu Item'}
       </Typography>
+
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -246,7 +280,11 @@ const MenuItemForm = () => {
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Button variant="contained" component="label" sx={{ backgroundColor: '#00796b', '&:hover': { backgroundColor: '#004d40' }, marginBottom: 2 }}>
+            <Button
+              variant="contained"
+              component="label"
+              sx={{ backgroundColor: '#00796b', '&:hover': { backgroundColor: '#004d40' }, marginBottom: 2 }}
+            >
               Upload Image
               <input type="file" hidden onChange={handleImageChange} />
             </Button>
@@ -266,21 +304,34 @@ const MenuItemForm = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" sx={{ width: '100%', backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#115293' } }}>
+          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ width: '50%', padding: 1.5, backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#115293' } }}
+            >
               {editMode ? 'Update Item' : 'Add Item'}
             </Button>
           </Grid>
         </Grid>
       </form>
 
-      <Typography variant="h5" gutterBottom sx={{ marginTop: 3, fontWeight: 'bold' }}>
-        Menu Items
-      </Typography>
-      <Grid container spacing={2}>
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackClose} severity="info" sx={{ width: '100%' }}>
+          {snackMessage}
+        </Alert>
+      </Snackbar>
+
+      <Grid container spacing={2} sx={{ marginTop: 2 }}>
   {menuItems.map((item) => (
-    <Grid item xs={12} sm={6} md={3} key={item.id}> {/* Change md={4} to md={3} */}
-      <Card sx={{ transition: '0.3s', '&:hover': { transform: 'scale(1.03)' } }}>
+    <Grid item xs={12} sm={6} md={2.4} key={item.id}>
+      <Card>
         <CardMedia
           component="img"
           height="140"
@@ -288,11 +339,21 @@ const MenuItemForm = () => {
           alt={item.name}
         />
         <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2' }}>{item.name}</Typography>
-          <Typography variant="body2" color="text.secondary">{item.description}</Typography>
-          <Typography variant="body1">Price: ${item.price}</Typography>
-          <Typography variant="body2" color="text.secondary">Status: {item.status}</Typography>
-          <Button onClick={() => handleEdit(item)} variant="outlined" color="primary" sx={{ marginTop: 1 }}>
+          <Typography gutterBottom variant="h5" component="div">
+            {item.name}
+          </Typography>
+          <Typography variant="body2" color="textSecondary" component="p">
+            {item.description}
+          </Typography>
+          <Typography variant="body2" color="textPrimary">
+            Price: ${item.price}
+          </Typography>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => handleEdit(item)}
+            sx={{ marginTop: 1 }}
+          >
             Edit
           </Button>
         </CardContent>
@@ -300,27 +361,10 @@ const MenuItemForm = () => {
     </Grid>
   ))}
 </Grid>
-
-<Grid item xs={12}>
-  <Button 
-    variant="contained" 
-    color="secondary" 
-    sx={{ width: '100%', backgroundColor: '#d32f2f', '&:hover': { backgroundColor: '#b71c1c' } }}
-    onClick={() => window.location.href='/orders'}  // Redirect to orders page
-  >
-    View Orders
-  </Button>
-</Grid>
-
-      <Snackbar open={snackOpen} autoHideDuration={6000} onClose={handleSnackClose}>
-        <Alert onClose={handleSnackClose} severity="success" sx={{ width: '100%' }}>
-          {snackMessage}
-        </Alert>
-      </Snackbar>
     </Paper>
+    </div>
+    </div>
   );
 };
 
 export default MenuItemForm;
-
-
