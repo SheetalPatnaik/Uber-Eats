@@ -8,13 +8,19 @@ import {
   Grid,
   Button,
   Box,
+  IconButton,
+  Drawer,
 } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import './RestaurantList.css'; // Import the CSS file for additional styles
 import { useNavigate } from 'react-router-dom';
-import backgroundImage from '/Users/aishwaryathorat/Movies/MSCourses/sem2/DS - Data 236/LABS/Uber-Eats/LAB1/frontend/src/restaurant.jpeg'; // Import your background image
+// import backgroundImage from '/Users/aishwaryathorat/Movies/MSCourses/sem2/DS - Data 236/LABS/Uber-Eats/LAB1/frontend/src/restaurant.jpeg'; // Import your background image
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
+  const [favorites, setFavorites] = useState([]); 
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
   const hardcodedRestaurants = [
@@ -62,6 +68,17 @@ const RestaurantList = () => {
         console.error('Error fetching restaurant data:', error);
       });
   }, []);
+  
+
+  const handleFavoriteClick = (restaurantName) => {
+    setFavorites((prevFavorites) =>
+      prevFavorites.includes(restaurantName)
+        ? prevFavorites.filter((name) => name !== restaurantName)
+        : [...prevFavorites, restaurantName]
+    );
+  };
+
+
 
   // Function to handle the restaurant click
   const handleRestaurantClick = (username) => {
@@ -72,6 +89,10 @@ const RestaurantList = () => {
   // Function to navigate to CustomerOrdersPage
   const handleViewOrders = () => {
     navigate('/customer-orders'); // Navigate to the Customer Orders page
+  };
+
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
   };
 
   return (
@@ -91,6 +112,7 @@ const RestaurantList = () => {
                 alt={restaurant.restaurant_name}
                 className="restaurant-image"
               />
+
               <CardContent>
                 <Typography variant="h6" component="div">
                   {restaurant.restaurant_name}
@@ -99,6 +121,33 @@ const RestaurantList = () => {
                   {restaurant.address}
                 </Typography>
               </CardContent>
+
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFavoriteClick(restaurant.restaurant_name);
+                }}
+                sx={{
+                  position: 'absolute',
+                  bottom: 8,
+                  right: 8,
+                  color: favorites.includes(restaurant.restaurant_name) ? 'error.main' : 'white',
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  },
+                  padding: '4px',
+                }}
+                aria-label="favorite"
+              >
+                {favorites.includes(restaurant.restaurant_name) ? (
+                  <FavoriteIcon />
+                ) : (
+                  <FavoriteBorderIcon />
+                )}
+              </IconButton>
+
+
             </Card>
           </Grid>
         ))}
@@ -115,6 +164,7 @@ const RestaurantList = () => {
               backgroundColor: '#003300', // Darker shade on hover
             },
             padding: '10px 20px',
+            marginRight: 2, 
             fontSize: '16px',
             fontWeight: 'bold',
             boxShadow: 2, // Add some shadow for depth
@@ -122,6 +172,48 @@ const RestaurantList = () => {
         >
           View Your Orders
         </Button>
+
+
+
+        <Button
+          variant="contained"
+          onClick={toggleDrawer}
+          sx={{
+            backgroundColor: '#03C04A', // Bottle green color
+            '&:hover': {
+              backgroundColor: '#003300', // Darker shade on hover
+            },
+            padding: '10px 20px',
+            marginRight: 2, 
+            fontSize: '16px',
+            fontWeight: 'bold',
+            boxShadow: 2, // Add some shadow for depth
+          }} // Style adjustments for the button
+        >
+          View Favorites
+        </Button>
+
+      
+          
+        <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer}>
+        <Box sx={{ width: 250, padding: 2 }}>
+          <Typography variant="h6">Favorite Restaurants</Typography>
+          {favorites.length === 0 ? (
+            <Typography variant="body2">No favorites added yet.</Typography>
+          ) : (
+            favorites.map((favorite, index) => (
+              <Typography key={index} variant="body2">
+                {favorite}
+              </Typography>
+            ))
+          )}
+        </Box>
+      </Drawer>
+
+
+
+
+
       </Box>
     </Box>
   );

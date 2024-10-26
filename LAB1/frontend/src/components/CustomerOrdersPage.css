@@ -4,7 +4,7 @@
     padding: 20px;
     min-height: 100vh; /* Ensure the background covers the entire viewport */
   }
-  
+
   .customer-orders-page::before {
     content: '';
     position: absolute;
@@ -12,7 +12,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('/Users/aishwaryathorat/Movies/MSCourses/sem2/DS - Data 236/LABS/Uber-Eats/LAB1/backend/media/menu_images/DaisyDukes.jpg'); /* Path to your food image */
+    background-image: url('../../../backend/media/menu_images/DaisyDukes.jpg'); /* Path to your food image */
     background-size: cover;
     background-position: center;
     filter: blur(8px); /* Adjust the blur as needed */

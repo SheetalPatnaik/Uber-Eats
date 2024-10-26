@@ -14,6 +14,10 @@ import {
   Avatar,
   Grid,
   Button,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { Dashboard } from "@mui/icons-material"; // Import Material-UI Dashboard icon
 
@@ -23,6 +27,11 @@ axios.defaults.withCredentials = true; // Allow sending cookies with requests
 const csrftoken = document.cookie.split(';').find(cookie => cookie.trim().startsWith('csrftoken='));
 const csrfTokenValue = csrftoken ? csrftoken.split('=')[1] : null;
 axios.defaults.headers.common['X-CSRFToken'] = csrfTokenValue;
+
+
+const countryOptions = ["United States", "Canada", "India", "Australia", "United Kingdom","Afghanistan","Albania","Algeria","Argentina","Austria","Belgium","Bangladesh","Bahamas","Belize"]; 
+
+
 
 function Profile() {
   const [profileData, setProfileData] = useState({
@@ -190,7 +199,7 @@ function Profile() {
               </Grid>
 
               {/* Country */}
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <Typography variant="body2" component="span">Country:</Typography>
                 <input
                   type="text"
@@ -200,7 +209,43 @@ function Profile() {
                   disabled={!isEditing}
                   style={{ width: "calc(100% - 100px)", padding: "10px", borderRadius: "4px", border: "1px solid #ccc", marginLeft: '10px' }} // Adjusted margin
                 />
-              </Grid>
+              </Grid> */}
+
+                
+
+<Grid container spacing={2} sx={{ padding: 2 }}>
+      {/* Country Dropdown */}
+      <Grid item xs={12}>
+        <Typography variant="body2" component="span">Country:</Typography>
+        <Select
+          name="country"
+          value={profileData.country || ""}
+          onChange={handleChange}
+          disabled={!isEditing}
+          displayEmpty
+          sx={{
+            width: "calc(100% - 100px)",
+            padding: "3px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+            marginLeft: "10px",
+            "& .MuiSelect-select": {
+              padding: "10px 14px",
+            },
+          }}
+        >
+          {countryOptions.map((country) => (
+            <MenuItem key={country} value={country}>
+              {country}
+            </MenuItem>
+          ))}
+        </Select>
+      </Grid>
+    </Grid>
+
+
+
+
 
               {/* City */}
               <Grid item xs={12}>

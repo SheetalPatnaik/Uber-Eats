@@ -75,7 +75,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('/Users/aishwaryathorat/Movies/MSCourses/sem2/DS - Data 236/LABS/Uber-Eats/LAB1/frontend/src/restaurant.jpeg'); /* Set your background image here */
+    background-image: url('../restaurant.jpeg'); /* Set your background image here */
     background-size: cover;
     background-position: center;
     filter: blur(8px); /* Adjust the blur level */
