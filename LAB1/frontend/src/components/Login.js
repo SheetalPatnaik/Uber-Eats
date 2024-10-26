@@ -158,7 +158,7 @@ function Login() {
         >
           <Container maxWidth="sm">
             <Typography variant="body1" sx={{ textAlign: 'center' }}>
-              © 2024 Uber Eats Clone (Aishwarya Thorat SJSU)
+              © 2024 Uber Eats Clone (Aishwarya Thorat and Sheetal Patnaik SJSU)
             </Typography>
           </Container>
         </Box>

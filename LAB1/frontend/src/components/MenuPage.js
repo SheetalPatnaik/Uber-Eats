@@ -115,10 +115,10 @@ const MenuPage = () => {
     setSnackOpen(false);
   };
 
-    // Function to navigate to CustomerOrdersPage
-    const handleViewOrders = () => {
-      navigate('/customer-orders'); // Navigate to the Customer Orders page
-    };
+    // // Function to navigate to CustomerOrdersPage
+    // const handleViewOrders = () => {
+    //   navigate('/customer-orders'); // Navigate to the Customer Orders page
+    // };
 
   return (
     <Paper sx={{ padding: 3, marginTop: 3, borderRadius: 2, boxShadow: 3 }}>
@@ -220,7 +220,7 @@ const MenuPage = () => {
       </Button>
 
 
-      {/* Button to navigate to Customer Orders page */}
+      {/* Button to navigate to Customer Orders page
       <Button
         variant="outlined"
         color="secondary"
@@ -228,7 +228,7 @@ const MenuPage = () => {
         onClick={handleViewOrders}
       >
         View Your Orders
-      </Button>
+      </Button> */}
 
       <Snackbar open={snackOpen} autoHideDuration={6000} onClose={handleSnackClose}>
         <Alert onClose={handleSnackClose} severity="success" sx={{ width: '100%' }}>
