@@ -25,9 +25,24 @@ class RestaurantOwner(models.Model):
 
     def __str__(self):
         return self.restaurant_name
-    
 
 
+class Order(models.Model):
+    order_id = models.AutoField(primary_key=True)  # Auto-incrementing order ID
+    item_name = models.CharField(max_length=255)  # Name of the ordered item
+    quantity = models.PositiveIntegerField()  # Quantity of the item
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # Price of the item
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)  # Total price of the order (quantity * price)
+    restaurant = models.ForeignKey(RestaurantOwner, on_delete=models.CASCADE)  # Link to RestaurantOwner model
+    order_status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Preparing', 'Preparing'), ('Delivered', 'Delivered')])  # Order status with choices
+
+    # def save(self, *args, **kwargs):
+    #     # Automatically calculate total price before saving
+    #     self.total_price = self.quantity * self.price
+    #     super(Order, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Order {self.order_id} - {self.item_name} ({self.quantity})"
 
 
 
@@ -42,4 +57,23 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
+class Dish(models.Model):
+    CATEGORY_CHOICES = (
+        ('Appetizer', 'Appetizer'),
+        ('Main Course', 'Main Course'),
+        ('Dessert', 'Dessert'),
+        ('Beverage', 'Beverage'),
+        ('Soup', 'Soup'),
+        ('Salad', 'Salad'),
+        ('Pizza', 'Pizza'),
+    )
 
+    # dish_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
+    dish_name = models.CharField(max_length=255)
+    restaurant = models.ForeignKey(RestaurantOwner, on_delete=models.CASCADE, related_name='dishes')  # Add related_name='dishes'
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
+
+    def __str__(self):
+        return f"{self.dish_name} - {self.restaurant.restaurant_name} (${self.price})"

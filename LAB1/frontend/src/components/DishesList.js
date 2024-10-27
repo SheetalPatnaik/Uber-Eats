@@ -1,64 +1,55 @@
 import React, { useEffect, useState } from 'react';
-import { fetchRestaurants } from './api'; // Adjust the path as needed
-import { Grid, Paper, Typography } from '@mui/material'; // Import necessary Material-UI components
+import axios from 'axios';
 
-const DishesList = () => {
+const RestaurantDashboard = () => {
   const [dishes, setDishes] = useState([]);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const loadDishes = async () => {
+    const fetchDishes = async () => {
       try {
-        const data = await fetchRestaurants('San Francisco'); // Update location as needed
-        console.log('Fetched data:', data); // Log the fetched data
-        // Assuming data contains an array of restaurants
-        setDishes(data.businesses || []); // Adjust based on the actual structure
+        const token = localStorage.getItem('authToken');
+        console.log("Auth Token:", token);  // Log the token for debugging
+        const response = await axios.get('http://localhost:8000/api/get_dishes', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        console.log("Fetched Dishes:", response.data);  // Log the response data
+        setDishes(response.data);
       } catch (err) {
-        setError('Failed to fetch restaurants');
+        setError('Failed to fetch dishes');
+        console.log(err);  // Log the error for debugging
       }
     };
 
-    loadDishes();
+    fetchDishes();
   }, []);
 
   return (
     <div>
-      <h2>Dishes</h2>
+      <h2>Restaurant Dashboard - Dishes</h2>
       {error && <p>{error}</p>}
-      <Grid container spacing={2}>
-        {Array.isArray(dishes) && dishes.map((dish) => (
-          <Grid item xs={12} sm={6} md={4} lg={2} key={dish.id}> {/* Adjust item sizes for a 5x5 grid */}
-            <Paper 
-              elevation={3} 
-              sx={{ 
-                padding: 2, 
-                height: '300px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'space-between',
-                transition: 'transform 0.3s ease', // Transition for zoom effect
-                '&:hover': {
-                  transform: 'scale(1.05)', // Scale up on hover
-                }
-              }}
-            >
-              <img
-                src={dish.image_url}
-                alt={dish.name}
-                style={{ width: '100%', height: '150px', objectFit: 'cover' }} // Ensure the image fits the space
+      <ul>
+        {dishes.length > 0 ? (
+          dishes.map((dish, index) => (
+            <li key={index}>
+              <h3>{dish.dish_name}</h3>  {/* Use dish_name from the model */}
+              <p>Category: {dish.category}</p>  {/* Use category from the model */}
+              <p>Price: ${dish.price}</p>  {/* Use price from the model */}
+              <img 
+                src={dish.item_image}  // Use only if the model has item_image
+                alt={dish.dish_name} 
+                style={{ width: '150px', height: '150px', objectFit: 'cover' }} 
               />
-              <Typography variant="h6" component="h3" sx={{ mt: 1 }}>
-                {dish.name}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {dish.description}, {dish.price}
-              </Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+            </li>
+          ))
+        ) : (
+          <p>No dishes available.</p>
+        )}
+      </ul>
     </div>
   );
 };
 
-export default DishesList;
+export default RestaurantDashboard;

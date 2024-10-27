@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from django.contrib.auth.models import User
-from .models import Profile,RestaurantOwner,UserProfile
+from .models import Profile,RestaurantOwner,UserProfile,Order
 from .forms import ProfileForm
 from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
@@ -16,7 +16,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .serializers import ProfileSerializer
-import requests
+# import requests
 
 from django.contrib.auth.hashers import make_password
 
@@ -149,7 +149,11 @@ def signup(request):
 # print(user_profile.user_type)
 
 
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .models import Dish
+from .serializers import DishSerializer
 
 
 @api_view(['POST'])
@@ -157,19 +161,136 @@ def rest_login(request):
     username = request.data.get('username')
     password = request.data.get('password')
 
-    # Logic to check if the user is a restaurant owner
     user = authenticate(username=username, password=password)
-    if user is not None:
-        # Check if this user is a restaurant owner
-        if hasattr(user, 'restaurantowner'):
-            # Successful login logic
-            # return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
+    if user is not None and user.is_active:
+        if hasattr(user, 'restaurantowner'):  # Check if the user is a restaurant owner
+            login(request, user)  # Creates a session for the user
             return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Not authorized as restaurant owner."}, status=status.HTTP_403_FORBIDDEN)
     else:
         return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
 
+# Create View for Adding Dishes:
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .models import Dish
+from .serializers import DishSerializer
+
+@api_view(['POST'])
+def add_dish(request):
+    try:
+        dish_name = request.data['dish_name']  # This should match the key from the frontend
+        price = request.data['price']
+        category = request.data['category']
+        
+        restaurant_owner = RestaurantOwner.objects.get(user=request.user)
+        dish = Dish.objects.create(
+            dish_name=dish_name,
+            price=price,
+            category=category,
+            restaurant=restaurant_owner
+        )
+        dish.save()
+        return Response({'message': 'Dish added successfully'}, status=200)
+    except KeyError as e:
+        return Response({'error': f'Missing field: {str(e)}'}, status=400)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Dish
+from .serializers import DishSerializer
+
+@api_view(['GET'])
+def get_dishes(request):
+    # Get the logged-in user
+    try:
+        user = request.user
+
+        # Fetch the restaurant owner associated with the logged-in user
+        restaurant_owner = RestaurantOwner.objects.get(user=user)
+
+        # Fetch dishes associated with this restaurant owner using restaurant_id or restaurant_name
+        dishes = Dish.objects.filter(restaurant_id=restaurant_owner.restaurant_id)  # or use restaurant_name
+
+        # Serialize the dishes
+        dishes_data = [
+            {
+                'dish_id':dish.id,
+                'dish_name': dish.dish_name,
+                'price': dish.price,
+                'category': dish.category,
+                'restaurant_name': restaurant_owner.restaurant_name,
+            }
+            for dish in dishes
+        ]
+
+        return Response(dishes_data)
+    except RestaurantOwner.DoesNotExist:
+        return Response({'error': 'Restaurant owner not found'}, status=404)
+
+    
+    # dishes = Dish.objects.all()  # Fetch all dishes
+    # serializer = DishSerializer(dishes, many=True)
+    # return Response(serializer.data)
+
+# @api_view(['PUT'])
+# def update_dish(request, pk):
+#     try:
+#         dish = Dish.objects.get(pk=pk)
+#     except Dish.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+#     serializer = DishSerializer(dish, data=request.data)
+    
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response(serializer.data)
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# @api_view(['PUT'])
+# def edit_dish(request, dish_id):
+#     try:
+#         # Find the dish based on the dish_name
+#         dish = Dish.objects.get(id=dish_id)
+#         # dish = Dish.objects.get(dish_name=dish_name)
+#         data = request.data
+#         dish.dish_name = data.get('dish_name', dish.dish_name)
+#         dish.price = data.get('price', dish.price)
+#         dish.category = data.get('category', dish.category)
+#         dish.save()
+#         return Response({'success': 'Dish updated successfully'})
+#     except Dish.DoesNotExist:
+#         return Response({'error': 'Dish not found'}, status=404)
+#     except Exception as e:
+#         return Response({'error': str(e)}, status=400)
+
+
+
+
+
+@api_view(['PUT'])
+def edit_dish(request, dish_id):
+    try:
+        # Get the current logged-in user (restaurant owner)
+        restaurant_owner = RestaurantOwner.objects.get(user=request.user)
+
+        # Get the dish that belongs to this restaurant owner with the matching dish_id
+        dish = Dish.objects.get(id=dish_id, restaurant=restaurant_owner.restaurant_name)
+    except Dish.DoesNotExist:
+        return Response({'error': 'Dish not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        # Update the dish with new data
+        serializer = DishSerializer(dish, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -305,3 +426,30 @@ def search_restaurants(request):
 #         return Response(response.json())
 #     else:
 #         return Response(response.json(), status=response.status_code)
+
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import RestaurantOwner
+
+@csrf_exempt
+def update_restaurant_profile(request):
+    if request.method == 'POST':
+        user = request.user
+        restaurant_owner = RestaurantOwner.objects.get(user=user)
+
+        restaurant_owner.restaurant_name = request.POST.get('restaurant_name')
+        restaurant_owner.location = request.POST.get('location')
+        restaurant_owner.description = request.POST.get('description')
+        restaurant_owner.contact_info = request.POST.get('contact_info')
+        restaurant_owner.timings = request.POST.get('timings')
+
+        if 'profile_picture' in request.FILES:
+            restaurant_owner.profile_picture = request.FILES['profile_picture']
+
+        restaurant_owner.save()
+        return JsonResponse({'message': 'Profile updated successfully!'}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)

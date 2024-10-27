@@ -19,12 +19,25 @@ from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 from accounts.views import search_restaurants
+from accounts import views 
+from django.urls import path, include
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('api/restaurants/', search_restaurants, name='search_restaurants'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('get_dishes/', views.get_dishes, name='get_dishes'),
+    path('api/', include('accounts.urls')),
+    path('api/get_dishes/', views.get_dishes, name='get_dishes'),
     # path('api/', search_restaurants, name='search_restaurants'),  # Add this line
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    

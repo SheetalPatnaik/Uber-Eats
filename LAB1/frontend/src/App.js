@@ -1,30 +1,3 @@
-// import logo from './logo.svg';
-// import './App.css';
-
-// function App() {
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <img src={logo} className="App-logo" alt="logo" />
-//         <p>
-//           Edit <code>src/App.js</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Learn React
-//         </a>
-//       </header>
-//     </div>
-//   );
-// }
-
-// export default App;
-
-
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./components/Signup";
@@ -34,30 +7,35 @@ import Dashboard from "./components/Dashboard";
 import Restaurant from "./components/Restaurant";
 import RestaurantDashboard from "./components/RestaurantDashboard";
 import RestLogin from './components/RestLogin'; 
+import AddDish from './components/AddDish'; 
+
 
 function App() {
   return (
     <Router>
       <div>
-        {/* <h1>Welcome to Uber Eats Clone</h1> */}
         <Routes>
-          {/* Redirect to signup first */}
+          {/* Redirect to signup by default */}
           <Route path="/" element={<Navigate to="/signup" />} />
 
           {/* Routes for Signup and Login */}
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
 
+          {/* Restaurant owner login route */}
+          <Route path="/restlogin" element={<RestLogin />} />
 
-          <Route path="/restaurantdashboard" element={<RestaurantDashboard />}>
-            {/* <Route path="restaurant" element={<Restaurant />} /> */}
-          </Route>
-          {/* Dashboard route */}
+          {/* Restaurant Dashboard with nested AddDish route */}
+          <Route path="/restaurantdashboard" element={<RestaurantDashboard />} />
+          <Route path="/adddish" element={<AddDish />} />
+
+          {/* User Profile route */}
+          <Route path="/profile" element={<Profile />} />
+
+          {/* General Dashboard route */}
           <Route path="/dashboard" element={<Dashboard />}>
             <Route path="restaurant" element={<Restaurant />} />
           </Route>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/restlogin" element={<RestLogin />} />
         </Routes>
       </div>
     </Router>

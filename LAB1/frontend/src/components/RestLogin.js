@@ -1,151 +1,212 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+// import React, { useState } from 'react';
+// import axios from 'axios';
+// import getCSRFToken from './csrf'; 
+
+// const RestaurantOwnerLogin = () => {
+//   const [username, setUsername] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [error, setError] = useState('');
+
+//   // Function to handle the login form submission
+//   const handleLogin = async (e) => {
+//     e.preventDefault();
+
+//     try {
+//       // Send POST request to the /rest_login endpoint
+//       const response = await axios.post('http://localhost:8000/api/rest_login/', {
+//         username,
+//         password
+//       }, { withCredentials: true }); // Allow sending cookies with requests
+
+//       // Handle successful login
+//       if (response.status === 200) {
+//         console.log('Login successful', response.data);
+//         // Here, you can redirect the user
+//         window.location.href = '/restaurantdashboard'; // Redirect to the dashboard after login
+//       }
+//     } catch (err) {
+//       console.error('Login failed', err.response?.data || err);
+//       setError('Login failed. Please check your credentials.');
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <h2>Restaurant Owner Login</h2>
+//       <form onSubmit={handleLogin}>
+//         <input
+//           type="text"
+//           placeholder="Username"
+//           value={username}
+//           onChange={(e) => setUsername(e.target.value)}
+//           required
+//         />
+//         <input
+//           type="password"
+//           placeholder="Password"
+//           value={password}
+//           onChange={(e) => setPassword(e.target.value)}
+//           required
+//         />
+//         <button type="submit">Login</button>
+//       </form>
+//       {error && <p>{error}</p>}
+//     </div>
+//   );
+// };
+
+// export default RestaurantOwnerLogin;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
-  Container,
-  TextField,
-  Button,
-  Typography,
   Box,
-  AppBar,
-  Toolbar,
-  Grid,
-  Link,
+  Button,
+  Container,
   CssBaseline,
-  Paper,
-} from "@mui/material";
+  TextField,
+  Typography,
+  Grid,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import logo from '../uber_Eats_logo_2.png';
 
-function RestaurantLogin() {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
+const FormContainer = styled(Container)({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: '100vh',
+});
 
-  const [errorMessage, setErrorMessage] = useState(""); // To handle the error message
-  const navigate = useNavigate(); // To handle redirection
+const RestaurantOwnerLogin = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  // Function to handle the login form submission
+  const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:8000/accounts/api/rest/login/", formData); // Update the endpoint as needed
 
-      // Check for a redirect response
-      if (response.data.redirect) {
-        navigate(response.data.redirect); // Redirect to the specified dashboard
+    try {
+      // Send POST request to the /rest_login endpoint
+      const response = await axios.post('http://localhost:8000/api/rest_login/', {
+        username,
+        password
+      }, { withCredentials: true }); // Allow sending cookies with requests
+
+      // Handle successful login
+      if (response.status === 200) {
+        console.log('Login successful', response.data);
+        // Redirect to the restaurant dashboard after login
+        navigate('/restaurantdashboard');
       }
     } catch (err) {
-      console.error(err);
-      setErrorMessage("Invalid credentials. Please try again.");
+      console.error('Login failed', err.response?.data || err);
+      setError('Login failed. Please check your credentials.');
     }
   };
 
   return (
-    <>
+    <FormContainer component="main" maxWidth="xs">
       <CssBaseline />
-      {/* Flex Container for the whole page */}
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '100vh',
+          alignItems: 'center',
         }}
       >
-        {/* Header */}
-        <AppBar position="static" sx={{ backgroundColor: '#06C167' }}>
-          <Toolbar>
-            <Box
-              component="img"
-              src={logo}
-              alt="Logo"
-              sx={{ height: 40, width: 'auto', mr: 2 }} // Set height, width auto
-            />
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Uber Eats Clone
-            </Typography>
-            <Button color="inherit" href="/signup">Sign Up</Button>
-          </Toolbar>
-        </AppBar>
-
-        {/* Main Content */}
-        <Container component="main" maxWidth="xs" sx={{ mt: 8, mb: 2, flexGrow: 1 }}>
-          <Paper elevation={3} sx={{ padding: 3 }}>
-            <Typography component="h1" variant="h5" align="center">
-              Restaurant Owner Login
-            </Typography>
-            {errorMessage && <Typography color="error" align="center">{errorMessage}</Typography>}
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    name="username"
-                    label="Username"
-                    fullWidth
-                    required
-                    value={formData.username}
-                    onChange={handleChange}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    name="password"
-                    label="Password"
-                    type="password"
-                    fullWidth
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                </Grid>
-              </Grid>
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2, backgroundColor: '#06C167' }}
-              >
-                Login
-              </Button>
-              <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <Link href="/signup" variant="body2">
-                    Don't have an account? Sign Up
-                  </Link>
-                </Grid>
-              </Grid>
-            </Box>
-          </Paper>
-        </Container>
-
-        {/* Footer */}
         <Box
-          component="footer"
-          sx={{
-            py: 3,
-            px: 2,
-            mt: 'auto',
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[200]
-                : theme.palette.grey[800],
-          }}
-        >
-          <Container maxWidth="sm">
-            <Typography variant="body1" sx={{ textAlign: 'center' }}>
-              © 2024 Uber Eats Clone (Aishwarya Thorat SJSU)
-            </Typography>
-          </Container>
+          component="img"
+          src={logo}
+          alt="Logo"
+          sx={{ height: 50, width: 'auto', mb: 2 }}
+        />
+        <Typography component="h1" variant="h5" sx={{ mb: 4 }}>
+          Restaurant Owner Login
+        </Typography>
+
+        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2, backgroundColor: '#06C167' }}
+          >
+            LOGIN
+          </Button>
         </Box>
       </Box>
-    </>
-  );
-}
 
-export default RestaurantLogin;
+      {error && (
+        <Typography color="error" align="center" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      )}
+
+      <Grid container justifyContent="flex-end">
+        <Grid item>
+          <Typography variant="body2">
+            Don't have an account?{' '}
+            <Button
+              variant="text"
+              sx={{ color: '#06C167' }}
+              onClick={() => navigate('/signup')}
+            >
+              Sign Up
+            </Button>
+          </Typography>
+        </Grid>
+      </Grid>
+    </FormContainer>
+  );
+};
+
+export default RestaurantOwnerLogin;
