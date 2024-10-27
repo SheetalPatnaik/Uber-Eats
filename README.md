@@ -1,14 +1,14 @@
 # Uber-Eats
 1.	Introduction
-o	Purpose: The main aim of this project is to build a prototype that is similar to UberEats as a food ordering and delivery platform. This involves building RESTful services with Django(backend) and React(frontend).
-o	The main goal here is that it simulates two primary roles: Customer and Restaurant. 
-o	For Customer we have creating their own profile (account management), browsing restaurants, viewing menus, adding items to a cart, and placing orders.
-o	Similarly for Restaurants we have account management, adding menu items, viewing and managing customer orders, and updating order statuses.
+	Purpose: The main aim of this project is to build a prototype that is similar to UberEats as a food ordering and delivery platform. This involves building RESTful services with Django(backend) and React(frontend).
+	The main goal here is that it simulates two primary roles: Customer and Restaurant. 
+	For Customer we have creating their own profile (account management), browsing restaurants, viewing menus, adding items to a cart, and placing orders.
+	Similarly for Restaurants we have account management, adding menu items, viewing and managing customer orders, and updating order statuses.
 
 2.	System Design
 Architecture:
-o	Backend: For backend we have used Django, we divided into multiple apps like accounts and ubereats_clone. The accounts app had functionalities which handles user authentication and profiles, while ubereats_clone handles the main project configuration.
-o	Frontend: The React frontend is used in order to handle the UI, state management, and API interactions with Django.
+	Backend: For backend we have used Django, we divided into multiple apps like accounts and ubereats_clone. The accounts app had functionalities which handles user authentication and profiles, while ubereats_clone handles the main project configuration.
+	Frontend: The React frontend is used in order to handle the UI, state management, and API interactions with Django.
 Key Components are as follows:
 Backend Components:
 Under accounts app we have the following: 
