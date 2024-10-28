@@ -1,4 +1,7 @@
 # Uber-Eats
+
+<img width="702" alt="image" src="https://github.com/user-attachments/assets/9ce9c7ad-db63-44fd-96d6-272586b4d2b2">
+
 1.	Introduction
 	Purpose: The main aim of this project is to build a prototype that is similar to UberEats as a food ordering and delivery platform. This involves building RESTful services with Django(backend) and React(frontend).
 	The main goal here is that it simulates two primary roles: Customer and Restaurant. 
