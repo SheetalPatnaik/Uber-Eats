@@ -1,10 +1,4 @@
 # Uber-Eats
-
-Flow Chart of the application -
-
-<img width="697" alt="image" src="https://github.com/user-attachments/assets/77b3f8f6-1ab8-44a3-ba8f-c204744f6a0e">
-
-
 1.	Introduction
 	Purpose: The main aim of this project is to build a prototype that is similar to UberEats as a food ordering and delivery platform. This involves building RESTful services with Django(backend) and React(frontend).
 	The main goal here is that it simulates two primary roles: Customer and Restaurant. 
@@ -12,6 +6,9 @@ Flow Chart of the application -
 	Similarly for Restaurants we have account management, adding menu items, viewing and managing customer orders, and updating order statuses.
 
 2.	System Design
+
+   <img width="697" alt="image" src="https://github.com/user-attachments/assets/77b3f8f6-1ab8-44a3-ba8f-c204744f6a0e">
+   
 Architecture:
 	Backend: For backend we have used Django, we divided into multiple apps like accounts and ubereats_clone. The accounts app had functionalities which handles user authentication and profiles, while ubereats_clone handles the main project configuration.
 	Frontend: The React frontend is used in order to handle the UI, state management, and API interactions with Django.
