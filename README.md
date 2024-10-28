@@ -66,4 +66,5 @@ b.	axios.js: This handles the HTTP requests to the backend, defines base URL, he
 5.	Add Items to Cart and Place Order: In order to place order, the customer has to add items by quantity and upon finalizing, the customer can click on Place Order button to successfully place the order.
 6.	Show Order Status: In order to track the status of the order, the customer can view it on this page. As there are changes in the restaurant order tracker, same progress is showed here also. 
 7.	Favorites: In scenario where customer wants to add few restaurants from the dashboard into favorites then there is heart to click on the restaurant name which adds that in the favorites list.
+   
 ![image](https://github.com/user-attachments/assets/4ead9eda-7937-4c85-927e-a7015f079801)
